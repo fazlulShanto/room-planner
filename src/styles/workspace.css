@@ -176,6 +176,8 @@
   top: 61px;
   width: 278px;
   padding: 17px;
+  max-height: calc(100% - 80px);
+  overflow-y: auto;
   border: 1px solid var(--line);
   border-radius: 11px;
   background: var(--panel);

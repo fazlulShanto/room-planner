@@ -162,6 +162,7 @@ export function useWorkspace() {
     )
   }
   return {
+    store,
     workspace,
     history,
     notice,

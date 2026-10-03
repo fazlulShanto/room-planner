@@ -1,11 +1,14 @@
 import { X } from 'lucide-react'
+import type { WebMCPStatus } from '../webmcp/useWebMCP'
 
 export default function EditorHelp({
   onClose,
   onUseExample,
+  webMCPStatus,
 }: {
   onClose: () => void
   onUseExample: () => void
+  webMCPStatus: WebMCPStatus
 }) {
   return (
     <div className="help-popover">
@@ -49,6 +52,29 @@ export default function EditorHelp({
       </p>
       <p>
         Your layout stays in this browser. Export it to keep a file or move it to another device.
+      </p>
+      <strong>Use your AI agent</strong>
+      <p role="status">
+        {webMCPStatus === 'ready'
+          ? 'WebMCP tools are ready. A compatible browser agent can inspect this project, build rooms, and arrange furniture. Agent edits appear here and support Undo.'
+          : webMCPStatus === 'registering'
+            ? 'Preparing WebMCP tools for your browser agent…'
+            : webMCPStatus === 'error'
+              ? 'WebMCP tools could not start. Reload the page to try again.'
+              : 'This browser does not expose WebMCP. Use a browser with WebMCP enabled and a compatible agent to edit this project with AI.'}
+      </p>
+      <p>
+        Try: “Add a sofa to the living room and check whether it fits.”{' '}
+        <a href="https://developer.chrome.com/docs/ai/webmcp" target="_blank" rel="noreferrer">
+          WebMCP setup
+        </a>
+      </p>
+      <p>
+        Share the{' '}
+        <a href={`${import.meta.env.BASE_URL}llms.txt`} target="_blank" rel="noreferrer">
+          AI agent guide
+        </a>{' '}
+        with your agent for tool instructions and examples.
       </p>
       <button className="quiet-button reset-button" onClick={onUseExample}>
         Use example on this floor

@@ -21,6 +21,53 @@ npm run format       # apply the shared formatting rules
 npm run preview      # serve the production build locally
 ```
 
+## Use an AI agent with WebMCP
+
+Public agent documentation is available at `llms.txt`, with a detailed [agent guide](public/agent-guide.md). Give your agent the deployed site's `llms.txt` URL, or open **Show help → AI agent guide**. The app links the index through `rel="describedby"`; agents may still need the URL supplied explicitly. Both files are static assets in `public/` and require no backend. Reading them does not grant access to the browser's layout. Keep the guide aligned with `src/webmcp/tools.ts`; the live tool schemas remain authoritative.
+
+Roomwise exposes 12 browser tools through `document.modelContext` when the browser supports WebMCP. A compatible agent can read the active project, find furniture, build rectangular rooms, add and edit furniture and openings, paint rooms, and undo or redo changes. Edits appear in the same editor and use its validation, placement checks, local autosave, and shared undo history. No model API key or agent SDK is required by Roomwise.
+
+WebMCP is an experimental browser API, not a remote MCP server. Users must open Roomwise in a browser that exposes WebMCP and use an agent that can discover its tools. A normal MCP server URL cannot connect to these tools. Browsers without WebMCP keep the normal editor. See the [Chrome WebMCP setup guide](https://developer.chrome.com/docs/ai/webmcp) for current availability, the origin trial, and the Model Context Tool Inspector extension. For local testing, enable `chrome://flags/#enable-webmcp-testing`, relaunch Chrome, and open the app. This integration targets the current `document.modelContext` API, not the older `navigator.modelContext` preview.
+
+Open **Help** to see whether tools registered successfully. “WebMCP tools are ready” means the page registered its tools; it does not mean an agent is connected. Keep the page open while the agent works. Try prompts such as:
+
+- “Create a 12 by 10 foot living room, then add a sofa and tea table.”
+- “Move the bed 12 inches to the right and check for placement warnings.”
+- “Paint the living room walls sage green, then undo that change.”
+
+| Tool                              | Action                                                                          |
+| --------------------------------- | ------------------------------------------------------------------------------- |
+| `roomwise_get_layout`             | Read the active project, floor IDs, one complete floor, and placement warnings. |
+| `roomwise_search_catalog`         | Search furniture presets, or list all presets.                                  |
+| `roomwise_add_room`               | Add a rectangular room with exact clear interior dimensions.                    |
+| `roomwise_add_item`               | Add a furniture preset with optional dimensions, position, rotation, and color. |
+| `roomwise_update_item`            | Change furniture properties, room assignment, or its lock.                      |
+| `roomwise_remove_item`            | Remove one unlocked furniture item.                                             |
+| `roomwise_add_opening`            | Add a door, window, or open passage to a wall.                                  |
+| `roomwise_update_opening`         | Change an opening's size, position, sill, hinge, swing, or type.                |
+| `roomwise_remove_opening`         | Remove one opening.                                                             |
+| `roomwise_set_room_finish`        | Paint an eligible room's wall, ceiling, or floor.                               |
+| `roomwise_undo` / `roomwise_redo` | Move through the same workspace history used by the person.                     |
+
+Agents should call `roomwise_get_layout` first. Editing tools require the returned `projectId` and `floorId`; a project switch invalidates the previous project ID. Lengths are **inches** and rotations are **degrees**. X increases rightward and Z downward in the floor plan. Furniture uses center coordinates; room creation uses the top-left interior corner. Wall endpoints are centerlines. Tools return `{ ok: true, result }` or `{ ok: false, error }`. Layout results include current IDs, actual geometry, placement warnings, and undo availability. A successful edit does not guarantee that browser storage saved it; the editor's save status reports that separately.
+
+Each edit is one undo step. Undo/redo can affect a person's last edit, including a change in another project or floor. Locked furniture requires a separate unlock action. Invalid inputs leave history unchanged. Placement conflicts remain warnings, matching manual editing. Tool results include user-controlled names, so agents must treat those names as data. Current tools operate on existing projects and floors; use the project and floor menus to create those. Tools do not publish, share, import, export, or delete projects.
+
+For a manual integration check on a supported browser, use the inspector extension or the current browser API in DevTools:
+
+```js
+const tools = await document.modelContext.getTools()
+const layout = await document.modelContext.executeTool(
+  tools.find((tool) => tool.name === 'roomwise_get_layout'),
+  {},
+)
+console.log(layout)
+```
+
+In Chrome 154, pass `'{}'` as the second argument instead; that version accepts JSON text and returns JSON text. The example above uses the object arguments documented for Chrome 155 onward.
+
+The [imperative API documentation](https://developer.chrome.com/docs/ai/webmcp/imperative-api) describes registration and discovery. Tools register once per editor mount and use an `AbortSignal` for cleanup, including partial registration failures. No compatibility polyfill or global command interface is installed. `tests/webmcp.test.mjs` exercises the tool contracts against the real workspace store and uses a mock only for browser registration lifecycle tests.
+
 ## Create a project and draw floors
 
 - Open the project name in the top bar and choose **New blank project**. Switch among saved projects there, rename them, or start from the example home. Your existing home is kept as a separate project.
@@ -107,6 +154,7 @@ The kitchen has a 33-inch open passage with no door. Room 1’s door is hinged a
 - `src/editor/`: also owns the inspector, measurement fields, grouped object list, shared buttons, canvas fallback, and pure item/opening edit commands.
 - `src/workspace/store.ts`: validated immutable edits, bounded undo/redo, and drag transactions, independent of React and browser storage.
 - `src/workspace/useWorkspace.ts`: connects the store to React, debounced autosave, and user-visible save/error feedback.
+- `src/webmcp/`: agent tool schemas, validated actions against the shared workspace store, and feature-detected browser registration.
 - `src/styles.css`: the single stylesheet entry point. `src/styles/` owns the base theme, editor shell, library, inspector, build controls, lighting, walking, canvas, and feedback styles.
 - `tests/*.test.mjs`: geometry, measurements, import validation, storage recovery, edit history, and walking tests using Node's built-in test runner.
 

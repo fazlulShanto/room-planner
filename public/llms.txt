@@ -1,0 +1,16 @@
+# Roomwise
+
+> Roomwise is a home planner with measured 2D floor plans, a 3D view, and editable furniture. Projects are saved in the user's browser. No account or application backend is required.
+
+This file is public documentation. Reading it does not give an agent access to the user's project. A compatible browser agent can use Roomwise's WebMCP tools in the open editor. Other agents can explain changes or work with a layout file the user provides. Roomwise has no remote MCP endpoint or connection URL.
+
+All tool measurements are inches; rotations are degrees. Read the current layout before editing. Use IDs returned by the tools, and check placement warnings after each change. Live tool schemas are the authority for accepted arguments.
+
+## Agent documentation
+
+- [Roomwise agent guide](./agent-guide.md): Browser access, all 12 WebMCP tools, coordinates, example calls, undo behavior, and working without WebMCP.
+
+## Optional
+
+- [WebMCP setup](https://developer.chrome.com/docs/ai/webmcp): Current browser support and local testing instructions.
+- [WebMCP imperative API](https://developer.chrome.com/docs/ai/webmcp/imperative-api): Browser tool discovery and execution.

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useWorkspace } from './workspace/useWorkspace'
+import { useWebMCP } from './webmcp/useWebMCP'
 import Inspector from './editor/Inspector'
 import ObjectList from './editor/ObjectList'
 import EditorHeader from './editor/EditorHeader'
@@ -42,6 +43,7 @@ import {
 
 export default function App() {
   const {
+    store,
     workspace,
     history,
     notice,
@@ -87,6 +89,14 @@ export default function App() {
   const issues = useMemo(() => checkPlan(plan), [plan])
   const issueIds = useMemo(() => new Set(issues.map((i) => i.itemId)), [issues])
   const navigationRef = useRef<HTMLElement>(null)
+  const webMCPStatus = useWebMCP(store, floor.id, ({ floorId, message }) => {
+    setFloorId(floorId)
+    setDrawingTool('select')
+    setBuildingView(false)
+    setRoomId('all')
+    setFitKey((key) => key + 1)
+    setNotice(message)
+  })
   function closeLibrary() {
     setSidebarOpen(false)
     navigationRef.current?.querySelector<HTMLButtonElement>(`[data-section="${leftTab}"]`)?.focus()
@@ -502,7 +512,13 @@ export default function App() {
               }}
               onFit={() => setFitKey((k) => k + 1)}
               help={help}
-              onHelp={() => setHelp((v) => !v)}
+              onHelp={() => {
+                setHelp((v) => !v)
+                if (!help && window.innerWidth < 1280) {
+                  setSidebarOpen(false)
+                  setInspectorOpen(false)
+                }
+              }}
             />
           }
           controls={
@@ -527,6 +543,7 @@ export default function App() {
         >
           {help && (
             <EditorHelp
+              webMCPStatus={webMCPStatus}
               onClose={() => setHelp(false)}
               onUseExample={() => {
                 commit(() => createInitialPlan())
