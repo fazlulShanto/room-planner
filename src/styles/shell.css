@@ -1,0 +1,502 @@
+/* App frame, tool rail, header, project menus, and status row. */
+
+.app-shell {
+  position: relative;
+  height: 100dvh;
+  min-height: 570px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.app-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  background: #fcfdf9;
+  z-index: 25;
+  height: var(--app-header-height);
+  padding: 0 16px;
+  gap: 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  letter-spacing: -1.1px;
+  font-size: 21px;
+  gap: 8px;
+}
+
+.brand-mark {
+  background: #315b47;
+  display: grid;
+  place-items: center;
+  color: #f6f7eb;
+  height: 28px;
+  width: 28px;
+  border-radius: 8px;
+}
+
+.brand-mark svg {
+  width: 19px;
+  height: 19px;
+}
+
+.brand-period {
+  color: #5f8f6b;
+}
+
+.header-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--line);
+}
+
+.project-menu {
+  position: relative;
+  min-width: 0;
+}
+
+.project-menu > summary {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  padding: 6px;
+  border-radius: 5px;
+  max-width: 210px;
+}
+
+.project-menu > summary span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.project-menu[open] > summary {
+  background: #eaf0e3;
+}
+
+.project-popover {
+  position: absolute;
+  z-index: 35;
+  background: #fcfdf8;
+  border: 1px solid #dce3d4;
+  border-radius: 10px;
+  box-shadow: 0 12px 40px #24352826;
+  padding: 15px;
+  width: 250px;
+  left: 0;
+  top: calc(100% + 10px);
+}
+
+.project-popover button {
+  font-size: 11px;
+}
+
+.floor-popover {
+  position: absolute;
+  z-index: 35;
+  background: #fcfdf8;
+  border: 1px solid #dce3d4;
+  border-radius: 10px;
+  box-shadow: 0 12px 40px #24352826;
+  padding: 15px;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 220px;
+  --build-font-size: 12px;
+  --build-input-font-size: 12px;
+}
+
+.floor-popover button {
+  font-size: 10px;
+  margin: 4px 0;
+}
+
+.save-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #86917f;
+  font-size: 11px;
+  margin-left: 3px;
+  white-space: nowrap;
+}
+
+.save-status.error {
+  color: #ae6144;
+}
+
+.saving-dot {
+  height: 5px;
+  width: 5px;
+  border-radius: 50%;
+  background: #aab295;
+}
+
+.header-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.action-divider {
+  height: 21px;
+  width: 1px;
+  background: var(--line);
+  margin: 0 6px;
+}
+
+.export-button {
+  padding: 7px 11px;
+  font-size: 11px;
+}
+
+.import-button {
+  font-size: 11px;
+  padding: 7px 9px;
+}
+
+.editor-layout {
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  --rail-width: 72px;
+  --library-width: 380px;
+  --inspector-width: 286px;
+  position: relative;
+  grid-template-columns: var(--rail-width) var(--library-width) minmax(0, 1fr) var(
+      --inspector-width
+    );
+}
+
+.editor-layout.sidebar-collapsed {
+  grid-template-columns: var(--rail-width) 0 minmax(0, 1fr) var(--inspector-width);
+}
+
+.editor-layout.inspector-collapsed {
+  grid-template-columns: var(--rail-width) var(--library-width) minmax(0, 1fr) 0;
+}
+
+.editor-layout.sidebar-collapsed.inspector-collapsed {
+  grid-template-columns: var(--rail-width) 0 minmax(0, 1fr) 0;
+}
+
+.workspace-rail {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px 7px 16px;
+  background: #f2f4ec;
+  border-right: 1px solid var(--line);
+  z-index: 22;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.rail-tools {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 7px;
+}
+
+.rail-button {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  min-height: 58px;
+  padding: 8px 2px;
+  border-radius: 11px;
+  color: #7b8576;
+}
+
+.rail-button span {
+  font-size: 10px;
+  font-weight: 550;
+  white-space: nowrap;
+}
+
+.rail-button.active {
+  background: #e0e9d8;
+  color: var(--green);
+}
+
+.rail-button.active::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 18px;
+  bottom: 18px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--green);
+}
+
+.rail-add {
+  margin-block: 5px;
+  background: #e7ecdf;
+  color: #46694d;
+}
+
+.rail-add.active {
+  background: var(--green);
+  color: #fff;
+}
+
+.rail-footer {
+  margin-top: auto;
+  padding-top: 24px;
+  color: #9ba78e;
+  display: flex;
+}
+
+.app-footer {
+  height: var(--status-height);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 14px;
+  flex-shrink: 0;
+  background: #f9faf5;
+  border-top: 1px solid var(--line);
+  font-size: 10px;
+  color: #8b987f;
+}
+
+.app-footer .fit-status {
+  padding: 4px 8px;
+  flex-shrink: 0;
+}
+
+.app-footer .fit-status[aria-expanded='true'] {
+  outline: 1px solid #91a581;
+  outline-offset: 1px;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  letter-spacing: 1px;
+  font-size: 8px;
+  white-space: nowrap;
+}
+
+.footer-dot {
+  width: 4px;
+  height: 4px;
+  background: #a3b18f;
+  border-radius: 50%;
+}
+
+.navigation-hint {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #73836a;
+  font-size: 10px;
+}
+
+.layout-counts {
+  white-space: nowrap;
+  font-size: 9px;
+}
+
+.footer-divider {
+  margin: 0 8px;
+  color: #c7cfbd;
+}
+
+.fit-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  white-space: nowrap;
+  color: #7d926b;
+  background: #e6ecdd;
+  border: 1px solid #dce6ce;
+  padding: 5px 8px;
+  border-radius: 5px;
+}
+
+.fit-status.has-issues {
+  color: #a37345;
+  background: #f5ead7;
+  border-color: #e9d7ba;
+}
+
+.toast {
+  position: fixed;
+  bottom: 43px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: #355940;
+  color: #f4f7ed;
+  padding: 12px 15px;
+  border: 1px solid #4a6c52;
+  border-radius: 9px;
+  box-shadow: 0 8px 30px #243b3926;
+  max-width: min(540px, calc(100vw - 30px));
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.toast button {
+  display: flex;
+  padding: 0;
+  flex-shrink: 0;
+  color: #bbd0ac;
+}
+
+@media (max-width: 1279px) {
+  .editor-layout {
+    --library-width: 0px;
+    --inspector-width: 0px;
+  }
+}
+
+@media (max-width: 1250px) {
+  .footer-brand {
+    display: none;
+  }
+}
+
+@media (max-width: 1150px) {
+  .save-status {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .header-divider,
+  .import-button {
+    display: none;
+  }
+
+  .action-divider {
+    margin: 0 3px;
+  }
+
+  .app-footer {
+    gap: 12px;
+  }
+
+  .navigation-hint {
+    font-size: 9px;
+  }
+
+  .layout-counts {
+    font-size: 8px;
+  }
+}
+
+@media (max-width: 600px) {
+  .header-actions .icon-button {
+    width: 27px;
+  }
+
+  .footer-divider {
+    margin: 0 5px;
+  }
+
+  .toast {
+    font-size: 11px;
+    bottom: calc(var(--status-height) + 10px);
+  }
+
+  .app-header {
+    padding: 0 12px;
+    gap: 7px;
+  }
+
+  .navigation-hint {
+    display: none;
+  }
+
+  .app-footer {
+    padding: 0 10px;
+    gap: 8px;
+    justify-content: space-between;
+  }
+
+  .project-menu > summary {
+    max-width: 100px;
+    font-size: 10px;
+    padding: 3px;
+  }
+
+  .project-popover {
+    left: -90px;
+    width: 240px;
+  }
+
+  .export-button {
+    font-size: 0;
+    gap: 0;
+    padding: 8px;
+  }
+
+  .export-button svg {
+    width: 15px;
+  }
+
+  .editor-layout {
+    --rail-width: 60px;
+  }
+
+  .workspace-rail {
+    padding: 12px 5px;
+  }
+
+  .rail-button {
+    min-height: 54px;
+    gap: 6px;
+    border-radius: 9px;
+  }
+
+  .rail-button span {
+    font-size: 9px;
+  }
+
+  .rail-button.active::before {
+    left: -5px;
+  }
+
+  .floor-popover {
+    width: min(220px, calc(100vw - 112px));
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .rail-button:hover:not(.active) {
+    background: #e7ecdf;
+    color: var(--green);
+  }
+}

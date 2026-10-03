@@ -1,0 +1,109 @@
+/* Wall and room drawing tools and the building inspector. */
+
+.build-panel {
+  --build-font-size: 12px;
+  --build-input-font-size: 12px;
+}
+
+.build-inspector h2 {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: #425d3c;
+  margin-bottom: 13px;
+}
+
+.build-panel h3 {
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  color: #819177;
+  margin: 22px 0 8px;
+  font-size: 11px;
+}
+
+.build-tools {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.build-tools button {
+  display: flex;
+  align-items: center;
+  border: 1px solid #dce4d4;
+  background: #f5f8ef;
+  color: #607757;
+  min-height: 43px;
+  padding: 10px;
+  gap: 8px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+.build-tools button[aria-pressed='true'] {
+  background: #dfead5;
+  border-color: #9eb790;
+  color: #315b47;
+}
+
+.quick-room {
+  margin: 18px 0;
+  border-top: 1px solid #e3e8dc;
+  border-bottom: 1px solid #e3e8dc;
+  padding: 13px 0;
+}
+
+.quick-room summary {
+  cursor: pointer;
+  color: #59724d;
+  font-size: 11px;
+}
+
+.quick-room .primary-button {
+  font-size: 11px;
+}
+
+.build-room {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  border-bottom: 1px solid #e5eadf;
+  color: #62765b;
+  padding: 12px 5px;
+  font-size: 12px;
+}
+
+.build-room strong {
+  font-weight: 500;
+}
+
+.build-room span {
+  color: #8d9a82;
+  font-size: 11px;
+}
+
+.build-room:hover {
+  background: #edf3e6;
+}
+
+.build-measure {
+  font-size: 13px;
+  color: #506f44;
+}
+
+.build-inspector > button {
+  font-size: 11px;
+}
+
+.build-panel > h2 {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .build-tools button {
+    font-size: 11px;
+    padding: 9px 7px;
+  }
+}

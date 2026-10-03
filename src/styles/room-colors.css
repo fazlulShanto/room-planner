@@ -1,0 +1,122 @@
+/* Room finish controls, color inputs, and palettes. */
+
+.room-colors > .small-description {
+  margin: 0 0 18px;
+}
+
+.surface-color-control {
+  padding: 0 0 19px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.surface-color-control h3 {
+  font-weight: 550;
+  color: #607452;
+  margin: 0 0 9px;
+  font-size: 12px;
+}
+
+.surface-color-input {
+  display: flex;
+  align-items: center;
+  border: 1px solid #dfe5d5;
+  border-radius: 7px;
+  background: #fdfef9;
+  padding: 5px;
+  gap: 8px;
+}
+
+.surface-color-input:focus-within {
+  border-color: #91ad7b;
+  box-shadow: 0 0 0 2px #91ad7b18;
+}
+
+.surface-color-picker {
+  position: relative;
+  display: block;
+  width: 28px;
+  height: 27px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 4px;
+  border: 1px solid #cbd4c4;
+}
+
+.surface-color-picker input {
+  width: 38px;
+  height: 37px;
+  position: absolute;
+  inset: -5px;
+  cursor: pointer;
+  padding: 0;
+  border: 0;
+}
+
+.surface-color-picker.mixed {
+  background: repeating-linear-gradient(135deg, #c8d3c0 0 6px, #f1eee6 6px 12px);
+}
+
+.surface-color-picker.mixed input {
+  opacity: 0;
+}
+
+.surface-color-input > input {
+  width: 100%;
+  min-width: 0;
+  background: none;
+  border: 0;
+  outline: 0;
+  color: #536747;
+  font-variant-numeric: tabular-nums;
+  padding: 3px 0;
+  font-size: 12px;
+}
+
+.surface-color-input.invalid {
+  border-color: #bc7760;
+}
+
+.color-input-error {
+  font-size: 10px;
+  line-height: 1.5;
+  color: #ad6145;
+  margin: 7px 0;
+}
+
+.surface-palette {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  gap: 8px;
+}
+
+.surface-palette button {
+  flex-shrink: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px #ccd5c6;
+  color: #435f3a;
+  display: grid;
+  place-items: center;
+  width: 23px;
+  height: 23px;
+}
+
+.surface-palette button[aria-pressed='true'] {
+  box-shadow: 0 0 0 2px #4b7857;
+}
+
+.color-walk-button {
+  font-size: 10px;
+  white-space: normal;
+  line-height: 1.5;
+  margin: 17px 0 5px;
+}
+
+.room-colors > .quiet-button {
+  font-size: 10px;
+}
+
+.room-colors > h2 {
+  display: none;
+}
