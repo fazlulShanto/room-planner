@@ -48,6 +48,8 @@ export default function EditorViewport({
   children,
 }: Props) {
   const { plan, roomId } = scene
+  const selectedItem = plan.items.find((item) => item.id === scene.selected)
+  const selectedOpening = plan.openings.find((opening) => opening.id === scene.selected)
   const [walkInput, setWalkInput] = useState<WalkInput>(STILL)
   const [walkHeightPreview, setWalkHeightPreview] = useState<number | null>(null)
   const eyeHeight = walkEyeHeight(plan, walkHeightPreview ?? plan.walkHeight)
@@ -178,6 +180,26 @@ export default function EditorViewport({
         />
       ) : (
         controls
+      )}
+      {view !== 'walk' &&
+        !buildingView &&
+        scene.tool === 'move' &&
+        selectedItem &&
+        !selectedItem.locked && (
+          <div className="manipulation-hint" role="status">
+            <strong>
+              {formatDimension(selectedItem.width, unit)} ×{' '}
+              {formatDimension(selectedItem.depth, unit)}
+            </strong>
+            <span>Drag item to move · Drag handles to resize</span>
+          </div>
+        )}
+      {view !== 'walk' && !buildingView && scene.tool === 'move' && selectedOpening && (
+        <div className="manipulation-hint" role="status">
+          <strong>{selectedOpening.name}</strong>
+          <span>Center {formatDimension(selectedOpening.center, unit)} from wall start</span>
+          <span>Drag along this wall · Stops at ends and other openings</span>
+        </div>
       )}
       {children}
     </main>

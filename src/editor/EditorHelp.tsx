@@ -19,12 +19,18 @@ export default function EditorHelp({
         </button>
       </div>
       <p>
-        Select an item, then enter its exact dimensions. Switch to Move to drag it, or use the
-        position fields for precision.
+        Hand mode lets you grab furniture and drag it across the floor. Select an item, then drag
+        its edge handles to change width or depth, or a corner handle to change both. Exact
+        dimensions remain available in Details. Locked items must be unlocked first.
+      </p>
+      <p>
+        Drag doors, windows, or open passages along their current wall in either view. They stop at
+        wall ends and other openings. In 3D, grab a door leaf or its green threshold. Each drag is
+        one undo step; the one-inch snap toggle also applies.
       </p>
       <div className="shortcut">
-        <span>Move furniture</span>
-        <kbd>M</kbd>
+        <span>Hand: move / resize</span>
+        <kbd>H / M</kbd>
       </div>
       <div className="shortcut">
         <span>Orbit / select</span>

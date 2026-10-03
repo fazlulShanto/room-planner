@@ -40,7 +40,7 @@ export default function EditorStatus({
         <span className="navigation-hint">
           {view === 'walk'
             ? 'WASD / arrows to walk · F door · Esc releases mouse / exits'
-            : `${tool === 'move' ? 'Drag furniture to move' : view === '3d' ? 'Drag to orbit · Right-drag to pan' : 'Drag background to pan'} · Scroll to zoom`}
+            : `${tool === 'move' ? 'Drag items to move · Drag handles to resize' : view === '3d' ? 'Drag to orbit · Right-drag to pan' : 'Drag background to pan'} · Scroll to zoom`}
         </span>
         <span className="layout-counts">
           {plan.items.length} items<span className="footer-divider">/</span>

@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent } from 'react'
 import {
   planBounds,
   roomOutline,
   type Point,
+  type Item,
+  type Opening,
   corners,
   localItemOutline,
   sectionalDimensions,
@@ -19,11 +21,23 @@ import type { DrawingProps } from './BuildPanel'
 import { canColorRoom } from './finishes'
 import type { SceneProps } from './Scene'
 import FurniturePlanSymbol from './FurniturePlanSymbol'
+import { openingCenterFromDrag } from './editor/openingManipulation'
+import {
+  moveFromDrag,
+  resizeFromDrag,
+  RESIZE_HANDLES,
+  type ResizeHandle,
+} from './editor/itemManipulation'
 
 export default function Plan2D(
   props: SceneProps & { unit: Unit; showClearance: boolean; drawing?: DrawingProps },
 ) {
   const svg = useRef<SVGSVGElement>(null)
+  const latest = useRef(props)
+  latest.current = props
+  const selectedItem = props.plan.items.find((item) => item.id === props.selected)
+  const [dragging, setDragging] = useState(false)
+  const [handleSize, setHandleSize] = useState(5)
   const orderedItems = [...props.plan.items].sort(
     (a, b) => a.elevation + a.height - b.elevation - b.height,
   )
@@ -81,14 +95,52 @@ export default function Plan2D(
   }
   const [box, setBox] = useState([-36, -34, 306, 520])
   const drag = useRef<{
-    id?: string
-    dx: number
-    dz: number
+    item?: Item
+    opening?: Opening
+    handle?: ResizeHandle
     startX: number
     startZ: number
-    box: number[]
+    clientX: number
+    clientY: number
     pointer: number
+    moved?: boolean
   } | null>(null)
+  function endDrag(pointer?: number) {
+    const d = drag.current
+    if (!d || (pointer !== undefined && pointer !== d.pointer)) return
+    drag.current = null
+    setDragging(false)
+    if (svg.current?.hasPointerCapture(d.pointer)) svg.current.releasePointerCapture(d.pointer)
+    if (d.item || d.opening) latest.current.onDragEnd()
+  }
+  useEffect(() => {
+    const blur = () => endDrag()
+    window.addEventListener('blur', blur)
+    return () => {
+      window.removeEventListener('blur', blur)
+      endDrag()
+    }
+  }, [])
+  useEffect(() => {
+    endDrag()
+  }, [props.tool, building, props.fitKey])
+  useEffect(() => {
+    if (drag.current?.item && (drag.current.item.id !== selectedItem?.id || selectedItem.locked))
+      endDrag()
+  }, [selectedItem?.id, selectedItem?.locked])
+  useEffect(() => {
+    if (drag.current?.opening && drag.current.opening.id !== props.selected) endDrag()
+  }, [props.selected])
+  useLayoutEffect(() => {
+    const measure = () => {
+      const scale = svg.current?.getScreenCTM()?.a
+      if (scale) setHandleSize(10 / scale)
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    if (svg.current) observer.observe(svg.current)
+    return () => observer.disconnect()
+  }, [box])
   useEffect(() => {
     const r = props.plan.rooms.find((r) => r.id === props.roomId)
     const b = planBounds(props.plan)
@@ -104,6 +156,45 @@ export default function Plan2D(
     point.y = clientY
     return point.matrixTransform(svg.current!.getScreenCTM()!.inverse())
   }
+  function startItemDrag(e: PointerEvent<SVGElement>, item: Item, handle?: ResizeHandle) {
+    if (e.button !== 0 || !e.isPrimary || drag.current) return
+    e.stopPropagation()
+    props.onSelect(item.id)
+    if (item.locked || props.tool !== 'move' || building) return
+    e.preventDefault()
+    const p = location(e.clientX, e.clientY)
+    drag.current = {
+      item,
+      handle,
+      startX: p.x,
+      startZ: p.y,
+      clientX: e.clientX,
+      clientY: e.clientY,
+      pointer: e.pointerId,
+    }
+    props.onDragStart()
+    setDragging(true)
+    svg.current!.setPointerCapture(e.pointerId)
+  }
+  function startOpeningDrag(e: PointerEvent<SVGElement>, opening: Opening) {
+    if (e.button !== 0 || !e.isPrimary || drag.current) return
+    e.stopPropagation()
+    props.onSelect(opening.id)
+    if (props.tool !== 'move' || building) return
+    e.preventDefault()
+    const p = location(e.clientX, e.clientY)
+    drag.current = {
+      opening,
+      startX: p.x,
+      startZ: p.y,
+      clientX: e.clientX,
+      clientY: e.clientY,
+      pointer: e.pointerId,
+    }
+    props.onDragStart()
+    setDragging(true)
+    svg.current!.setPointerCapture(e.pointerId)
+  }
   return (
     <svg
       ref={svg}
@@ -111,7 +202,7 @@ export default function Plan2D(
       viewBox={box.join(' ')}
       aria-label="Interactive floor plan. Draw walls and rooms, place openings, or select objects to edit."
       role="img"
-      style={{ cursor: building ? 'crosshair' : undefined }}
+      style={{ cursor: building ? 'crosshair' : dragging ? 'grabbing' : undefined }}
       onPointerDownCapture={(e) => {
         if (!building || e.button !== 0) return
         e.stopPropagation()
@@ -138,6 +229,7 @@ export default function Plan2D(
         e.currentTarget.setPointerCapture(e.pointerId)
       }}
       onWheel={(e) => {
+        if (drag.current) return
         const factor = e.deltaY > 0 ? 1.1 : 0.9,
           point = location(e.clientX, e.clientY)
         setBox((b) => {
@@ -152,6 +244,7 @@ export default function Plan2D(
         })
       }}
       onPointerDown={(e) => {
+        if (e.button !== 0 || !e.isPrimary || drag.current) return
         if (
           e.target !== svg.current &&
           !(e.target as Element).classList.contains('floor-background')
@@ -160,13 +253,13 @@ export default function Plan2D(
         const p = location(e.clientX, e.clientY)
         props.onSelect(null)
         drag.current = {
-          dx: 0,
-          dz: 0,
           startX: p.x,
           startZ: p.y,
-          box: [...box],
+          clientX: e.clientX,
+          clientY: e.clientY,
           pointer: e.pointerId,
         }
+        setDragging(true)
         e.currentTarget.setPointerCapture(e.pointerId)
       }}
       onPointerMove={(e) => {
@@ -177,13 +270,22 @@ export default function Plan2D(
         const d = drag.current
         if (!d || d.pointer !== e.pointerId) return
         const p = location(e.clientX, e.clientY)
-        if (d.id) {
-          const step = props.snap ? 1 : 0.01
-          props.onMove(
-            d.id,
-            Math.round((p.x + d.dx) / step) * step,
-            Math.round((p.y + d.dz) / step) * step,
-          )
+        if (d.item || d.opening) {
+          if (!d.moved && Math.hypot(e.clientX - d.clientX, e.clientY - d.clientY) < 3) return
+          d.moved = true
+          const delta: Point = [p.x - d.startX, p.y - d.startZ]
+          if (d.opening)
+            props.onMoveOpening(
+              d.opening.id,
+              openingCenterFromDrag(props.plan, d.opening, delta, props.snap),
+            )
+          else if (d.item)
+            props.onTransform(
+              d.item.id,
+              d.handle
+                ? resizeFromDrag(d.item, d.handle, delta, props.snap)
+                : moveFromDrag(d.item, delta, props.snap),
+            )
         } else setBox((b) => [b[0] + d.startX - p.x, b[1] + d.startZ - p.y, b[2], b[3]])
       }}
       onPointerUp={(e) => {
@@ -193,15 +295,15 @@ export default function Plan2D(
           if (down.fresh && Math.hypot(e.clientX - down.x, e.clientY - down.y) > 8)
             finishDraw(down.point, drawPoint(e.clientX, e.clientY, e.shiftKey))
         }
-        if (drag.current?.id) props.onDragEnd()
-        drag.current = null
+        endDrag(e.pointerId)
         if (e.currentTarget.hasPointerCapture(e.pointerId))
           e.currentTarget.releasePointerCapture(e.pointerId)
       }}
-      onPointerCancel={() => {
-        if (drag.current?.id) props.onDragEnd()
-        drag.current = null
+      onPointerCancel={(e) => {
+        drawDown.current = null
+        endDrag(e.pointerId)
       }}
+      onLostPointerCapture={(e) => endDrag(e.pointerId)}
     >
       <defs>
         <pattern id="plan-grid" width="12" height="12" patternUnits="userSpaceOnUse">
@@ -220,7 +322,7 @@ export default function Plan2D(
         <g
           key={r.id}
           onPointerDown={(e) => {
-            if (props.drawing?.tool === 'select') {
+            if (props.drawing?.tool === 'select' && props.tool !== 'move') {
               e.stopPropagation()
               props.onSelect(r.id)
             }
@@ -301,11 +403,8 @@ export default function Plan2D(
           <g
             key={o.id}
             transform={`translate(${x} ${z}) rotate(${-wallAngle(wall)})`}
-            onPointerDown={(e) => {
-              e.stopPropagation()
-              props.onSelect(o.id)
-            }}
-            className="opening-shape"
+            onPointerDown={(e) => startOpeningDrag(e, o)}
+            className={`opening-shape ${props.tool === 'move' ? 'movable' : ''}`}
           >
             <rect
               x={-o.width / 2}
@@ -383,23 +482,7 @@ export default function Plan2D(
             key={item.id}
             transform={`translate(${item.x} ${item.z}) rotate(${-item.rotation})`}
             className={`furniture-shape ${props.tool === 'move' && !item.locked ? 'movable' : ''}`}
-            onPointerDown={(e) => {
-              e.stopPropagation()
-              props.onSelect(item.id)
-              if (e.button !== 0 || item.locked || props.tool !== 'move') return
-              const p = location(e.clientX, e.clientY)
-              drag.current = {
-                id: item.id,
-                dx: item.x - p.x,
-                dz: item.z - p.y,
-                startX: p.x,
-                startZ: p.y,
-                box,
-                pointer: e.pointerId,
-              }
-              props.onDragStart()
-              svg.current!.setPointerCapture(e.pointerId)
-            }}
+            onPointerDown={(e) => startItemDrag(e, item)}
           >
             <path
               d={
@@ -561,24 +644,6 @@ export default function Plan2D(
             )}
             {selected && (
               <>
-                {corners({
-                  x: 0,
-                  z: 0,
-                  width: item.width,
-                  depth: item.depth,
-                  rotation: 0,
-                }).map(([x, y], i) => (
-                  <rect
-                    key={i}
-                    x={x - 1.7}
-                    y={y - 1.7}
-                    width="3.4"
-                    height="3.4"
-                    fill="#f8fbf5"
-                    stroke="var(--green)"
-                    strokeWidth=".9"
-                  />
-                ))}
                 <path
                   d={`M${-item.width / 2} ${item.depth / 2 + 6}h${item.width}`}
                   stroke="var(--green)"
@@ -593,6 +658,29 @@ export default function Plan2D(
           </g>
         )
       })}
+      {selectedItem && !selectedItem.locked && props.tool === 'move' && !building && (
+        <g
+          transform={`translate(${selectedItem.x} ${selectedItem.z}) rotate(${-selectedItem.rotation})`}
+        >
+          {RESIZE_HANDLES.map((handle, index) => (
+            <rect
+              key={index}
+              className="resize-handle"
+              aria-label={handle.label}
+              x={(handle.x * selectedItem.width) / 2 - handleSize / 2}
+              y={(handle.z * selectedItem.depth) / 2 - handleSize / 2}
+              width={handleSize}
+              height={handleSize}
+              rx={handleSize / 5}
+              vectorEffect="non-scaling-stroke"
+              style={{ cursor: 'crosshair' }}
+              onPointerDown={(e) => startItemDrag(e, selectedItem, handle)}
+            >
+              <title>{handle.label}</title>
+            </rect>
+          ))}
+        </g>
+      )}
       <g transform="translate(249 10)" pointerEvents="none">
         <path d="M0 15V0m-3 5 3-5 3 5" stroke="var(--text-muted)" fill="none" strokeWidth=".8" />
         <text x="0" y="-5" className="compass-label">

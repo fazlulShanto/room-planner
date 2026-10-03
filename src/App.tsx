@@ -12,7 +12,8 @@ import EditorToolDock from './editor/EditorToolDock'
 import EditorHelp from './editor/EditorHelp'
 import EditorStatus from './editor/EditorStatus'
 import { useEditorShortcuts } from './editor/useEditorShortcuts'
-import { changeItem } from './editor/planCommands'
+import { changeItem, changeOpening } from './editor/planCommands'
+import { transformItem, type ItemTransform } from './editor/itemManipulation'
 import FurnitureLibrary from './FurnitureLibrary'
 import BuildPanel, { type DrawingTool, type DrawingProps } from './BuildPanel'
 import { FloorControls } from './ProjectControls'
@@ -33,7 +34,6 @@ import {
   createInitialPlan,
   planBounds,
   placeNewItem,
-  round,
   type Item,
   type ItemKind,
   type LightingSettings,
@@ -71,7 +71,7 @@ export default function App() {
   const lighting = lightingPreview ?? plan.lighting ?? DEFAULT_LIGHTING
   const [selected, setSelected] = useState<string | null>('bed-room3')
   const [view, setView] = useState<EditorView>(plan.rooms.length ? '3d' : '2d'),
-    [tool, setTool] = useState<'orbit' | 'move'>('orbit')
+    [tool, setTool] = useState<'orbit' | 'move'>('move')
   const [roomId, setRoomId] = useState('all'),
     [unit, setUnit] = useState<Unit>('imperial'),
     [wallMode, setWallMode] = useState<'cut' | 'full' | 'none'>('cut')
@@ -147,6 +147,7 @@ export default function App() {
     const next = placeNewItem(plan, kind, roomId === 'all' ? item?.roomId || 'room3' : roomId)
     if (!commit((p) => ({ ...p, items: [...p.items, next] }))) return
     setSelected(next.id)
+    chooseTool('move')
     revealDetails()
     setLeftTab('items')
     setQuery('')
@@ -160,18 +161,13 @@ export default function App() {
     }))
     setSelected(null)
   }
-  function moveItem(id: string, x: number, z: number) {
-    updatePlan(
-      project.id,
-      floor.id,
-      (p) => ({
-        ...p,
-        items: p.items.map((i) =>
-          i.id === id && !i.locked ? { ...i, x: round(x), z: round(z) } : i,
-        ),
-      }),
-      true,
-    )
+  function manipulateItem(id: string, patch: ItemTransform) {
+    updatePlan(project.id, floor.id, (p) => transformItem(p, id, patch), true)
+  }
+  function chooseTool(next: 'orbit' | 'move') {
+    setTool(next)
+    setDrawingTool('select')
+    setBuildingView(false)
   }
   useEditorShortcuts({
     enabled: view !== 'walk',
@@ -183,7 +179,7 @@ export default function App() {
       setHelp(false)
       setShowIssues(false)
     },
-    onTool: setTool,
+    onTool: chooseTool,
     onUpdateItem: updateItem,
     onRemove: remove,
   })
@@ -302,9 +298,15 @@ export default function App() {
     fitKey,
     onSelect: (id) => {
       setSelected(id)
-      if (id) revealDetails()
+      // Opening a side panel during pointer-down changes the drag's projection.
+      const clickedItem = plan.items.find((i) => i.id === id)
+      const clickedOpening = plan.openings.some((opening) => opening.id === id)
+      if (id && (tool !== 'move' || (!clickedItem && !clickedOpening) || clickedItem?.locked))
+        revealDetails()
     },
-    onMove: moveItem,
+    onTransform: manipulateItem,
+    onMoveOpening: (id, center) =>
+      updatePlan(project.id, floor.id, (p) => changeOpening(p, id, { center }), true),
     onDragStart: beginDrag,
     onDragEnd: endDrag,
     issueIds,
@@ -382,6 +384,7 @@ export default function App() {
               building={buildingView}
               onBuilding={() => {
                 setBuildingView((v) => !v)
+                setTool('orbit')
                 setView('3d')
                 setRoomId('all')
                 setSelected(null)
@@ -483,7 +486,6 @@ export default function App() {
           showClearance={showClearance}
           onExitWalk={() => {
             setView('3d')
-            setTool('orbit')
           }}
           onWalkHeight={(height) => commit((p) => ({ ...p, walkHeight: height }))}
           onNotice={setNotice}
@@ -492,7 +494,7 @@ export default function App() {
               view={view}
               onView={(next) => {
                 setView(next)
-                setTool(next === '2d' ? 'move' : 'orbit')
+                setDrawingTool('select')
                 if (next === 'walk') {
                   setSelected(null)
                   setHelp(false)
@@ -526,7 +528,7 @@ export default function App() {
               <EditorToolDock
                 view={view}
                 tool={tool}
-                onTool={setTool}
+                onTool={chooseTool}
                 item={item}
                 onUpdateItem={updateItem}
                 grid={grid}

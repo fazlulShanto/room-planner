@@ -39,8 +39,9 @@ export function useEditorShortcuts({
       if (e.key === 'Escape') {
         onEscape()
       }
+      if (e.metaKey || e.ctrlKey || e.altKey) return
       if (e.key.toLowerCase() === 'v') onTool('orbit')
-      if (e.key.toLowerCase() === 'm') onTool('move')
+      if (['h', 'm'].includes(e.key.toLowerCase())) onTool('move')
       if (!item || item.locked) return
       if (e.key.toLowerCase() === 'r') {
         e.preventDefault()

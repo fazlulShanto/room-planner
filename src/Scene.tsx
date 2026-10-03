@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
@@ -9,6 +9,15 @@ import { canColorRoom, roomFinishes } from './finishes'
 import { RoomFloor, RoomCeiling, WallStructure, useWallHeights } from './Architecture'
 import { homeFurnitureParts, type FurniturePart } from './homeFurniture'
 import type { WalkInput } from './walk'
+import { useSceneDrag } from './editor/useSceneDrag'
+import { openingCenterFromDrag } from './editor/openingManipulation'
+import {
+  moveFromDrag,
+  resizeFromDrag,
+  RESIZE_HANDLES,
+  type ItemTransform,
+  type ResizeHandle,
+} from './editor/itemManipulation'
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
 import {
   m,
@@ -17,6 +26,8 @@ import {
   wallAngle,
   wallPoint,
   type Item,
+  type Opening,
+  type Wall,
   type LightingSettings,
   type Plan,
   type Room,
@@ -37,7 +48,8 @@ export type SceneProps = {
   snap: boolean
   fitKey: number
   onSelect: (id: string | null) => void
-  onMove: (id: string, x: number, z: number) => void
+  onTransform: (id: string, patch: ItemTransform) => void
+  onMoveOpening: (id: string, center: number) => void
   onDragStart: () => void
   onDragEnd: () => void
   issueIds: Set<string>
@@ -261,6 +273,46 @@ function ItemOutline({ item, color }: { item: Item; color: string }) {
     </lineSegments>
   )
 }
+function ResizeGrip({
+  item,
+  handle,
+  onPointerDown,
+}: {
+  item: Item
+  handle: ResizeHandle
+  onPointerDown: (e: ThreeEvent<PointerEvent>) => void
+}) {
+  const mesh = useRef<THREE.Mesh>(null)
+  const { camera, viewport, size, gl } = useThree()
+  const worldPosition = useMemo(() => new THREE.Vector3(), [])
+  useFrame(() => {
+    if (!mesh.current) return
+    mesh.current.getWorldPosition(worldPosition)
+    // Keep grips usable when zooming out or changing the canvas size.
+    mesh.current.scale.setScalar(
+      (viewport.getCurrentViewport(camera, worldPosition).height / size.height) * 12,
+    )
+  })
+  return (
+    <mesh
+      ref={mesh}
+      position={[
+        m((handle.x * item.width) / 2),
+        m(item.height) + 0.02,
+        m((handle.z * item.depth) / 2),
+      ]}
+      renderOrder={10}
+      onPointerDown={onPointerDown}
+      onPointerOver={(e) => {
+        e.stopPropagation()
+        gl.domElement.style.cursor = 'crosshair'
+      }}
+    >
+      <boxGeometry args={[1, 0.45, 1]} />
+      <meshBasicMaterial color="#2e9470" depthTest={false} depthWrite={false} />
+    </mesh>
+  )
+}
 function Furniture({
   item,
   props,
@@ -270,77 +322,51 @@ function Furniture({
   props: SceneProps
   setDragging: (v: boolean) => void
 }) {
-  const drag = useRef<{
-    pointer: number
-    offsetX: number
-    offsetZ: number
-  } | null>(null)
   const { gl } = useThree()
-  const plane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), [])
-  const point = useMemo(() => new THREE.Vector3(), [])
-  const stop = (e: ThreeEvent<PointerEvent>) => {
-    if (!drag.current || drag.current.pointer !== e.pointerId) return
-    e.stopPropagation()
-    drag.current = null
-    setDragging(false)
-    gl.domElement.style.cursor = 'grab'
-    props.onDragEnd()
-    ;(e.target as unknown as Element).releasePointerCapture(e.pointerId)
-  }
+  const gesture = useSceneDrag<{ item: Item; handle?: ResizeHandle }>({
+    id: item.id,
+    props,
+    disabled: item.locked,
+    setDragging,
+    onMove: (original, delta) =>
+      props.onTransform(
+        original.item.id,
+        original.handle
+          ? resizeFromDrag(original.item, original.handle, delta, props.snap)
+          : moveFromDrag(original.item, delta, props.snap),
+      ),
+  })
   return (
     <group
       position={[m(item.x), m(item.elevation), m(item.z)]}
       rotation={[0, (item.rotation * Math.PI) / 180, 0]}
-      onPointerDown={(e) => {
-        if (props.walk || e.button !== 0) return
-        e.stopPropagation()
-        props.onSelect(item.id)
-        if (
-          props.tool !== 'move' ||
-          item.locked ||
-          drag.current ||
-          !e.ray.intersectPlane(plane, point)
-        )
-          return
-        drag.current = {
-          pointer: e.pointerId,
-          offsetX: item.x - point.x / 0.0254,
-          offsetZ: item.z - point.z / 0.0254,
-        }
-        ;(e.target as unknown as Element).setPointerCapture(e.pointerId)
-        setDragging(true)
-        gl.domElement.style.cursor = 'grabbing'
-        props.onDragStart()
-      }}
-      onPointerMove={(e) => {
-        if (!drag.current || drag.current.pointer !== e.pointerId) return
-        e.stopPropagation()
-        if (e.ray.intersectPlane(plane, point)) {
-          const step = props.snap ? 1 : 0.01
-          props.onMove(
-            item.id,
-            Math.round((point.x / 0.0254 + drag.current.offsetX) / step) * step,
-            Math.round((point.z / 0.0254 + drag.current.offsetZ) / step) * step,
-          )
-        }
-      }}
-      onPointerUp={stop}
-      onPointerCancel={stop}
+      onPointerDown={(e) => gesture.start(e, { item })}
       onPointerOver={(e) => {
         if (props.walk) return
         e.stopPropagation()
-        if (!drag.current)
+        if (!gesture.isDragging())
           gl.domElement.style.cursor = props.tool === 'move' && !item.locked ? 'grab' : 'pointer'
       }}
       onPointerOut={() => {
-        if (props.walk) return
-        if (!drag.current) gl.domElement.style.cursor = 'auto'
+        if (!props.walk && !gesture.isDragging()) gl.domElement.style.cursor = 'auto'
       }}
     >
       <FurnitureShape item={item} />
       {(props.selected === item.id || props.issueIds.has(item.id)) && (
         <ItemOutline item={item} color={props.issueIds.has(item.id) ? '#b46142' : '#276e54'} />
       )}
+      {props.selected === item.id &&
+        props.tool === 'move' &&
+        !item.locked &&
+        !props.walk &&
+        RESIZE_HANDLES.map((handle, index) => (
+          <ResizeGrip
+            key={index}
+            item={item}
+            handle={handle}
+            onPointerDown={(e) => gesture.start(e, { item, handle })}
+          />
+        ))}
     </group>
   )
 }
@@ -369,15 +395,80 @@ function FloorLabel({ room }: { room: Room }) {
     </mesh>
   )
 }
-function Walls({ props }: { props: SceneProps }) {
+function OpeningObject({
+  opening,
+  wall,
+  props,
+  setDragging,
+  children,
+}: {
+  opening: Opening
+  wall: Wall
+  props: SceneProps
+  setDragging: (dragging: boolean) => void
+  children: ReactNode
+}) {
+  const { gl } = useThree()
+  const [x, z] = wallPoint(wall, opening.center)
+  const axis = useMemo(
+    () => new THREE.Vector3(wall.to[0] - wall.from[0], 0, wall.to[1] - wall.from[1]).normalize(),
+    [wall],
+  )
+  const gesture = useSceneDrag<Opening>({
+    id: opening.id,
+    props,
+    setDragging,
+    onMove: (original, delta) =>
+      props.onMoveOpening(
+        original.id,
+        openingCenterFromDrag(props.plan, original, delta, props.snap),
+      ),
+  })
+  return (
+    <group
+      userData={opening.kind === 'door' ? { walkDoorId: opening.id } : {}}
+      position={[m(x), m(opening.sill), m(z)]}
+      rotation={[0, (wallAngle(wall) * Math.PI) / 180, 0]}
+      onPointerDown={(e) => gesture.start(e, opening, axis)}
+      onPointerOver={(e) => {
+        if (props.walk) return
+        e.stopPropagation()
+        if (!gesture.isDragging())
+          gl.domElement.style.cursor = props.tool === 'move' ? 'grab' : 'pointer'
+      }}
+      onPointerOut={() => {
+        if (!props.walk && !gesture.isDragging()) gl.domElement.style.cursor = 'auto'
+      }}
+    >
+      {children}
+      {!props.walk && props.tool === 'move' && opening.kind === 'door' && (
+        <mesh position={[0, 0.02, 0]}>
+          <boxGeometry args={[m(opening.width), 0.04, m(wall.thickness) + 0.08]} />
+          <meshBasicMaterial
+            color="#3d876a"
+            transparent
+            opacity={props.selected === opening.id ? 0.5 : 0.18}
+            depthWrite={false}
+          />
+        </mesh>
+      )}
+    </group>
+  )
+}
+function Walls({
+  props,
+  setDragging,
+}: {
+  props: SceneProps
+  setDragging: (dragging: boolean) => void
+}) {
   const heights = useWallHeights(props.plan, props.wallMode, props.walk)
   if (props.wallMode === 'none' && !props.walk) return null
   return (
     <>
       <WallStructure plan={props.plan} heights={heights} />
       {props.plan.openings.map((o) => {
-        const wall = props.plan.walls.find((w) => w.id === o.wallId)!,
-          [x, z] = wallPoint(wall, o.center)
+        const wall = props.plan.walls.find((w) => w.id === o.wallId)!
         const w = m(o.width),
           h = m(
             Math.min(o.height, Math.max(0, (heights.get(wall.id) || props.plan.ceiling) - o.sill)),
@@ -387,16 +478,7 @@ function Walls({ props }: { props: SceneProps }) {
           leaf = doorLeaf(o)
         if (h <= 0) return null
         return (
-          <group
-            key={o.id}
-            userData={o.kind === 'door' ? { walkDoorId: o.id } : {}}
-            position={[m(x), m(o.sill), m(z)]}
-            rotation={[0, (wallAngle(wall) * Math.PI) / 180, 0]}
-            onClick={(e) => {
-              e.stopPropagation()
-              if (!props.walk) props.onSelect(o.id)
-            }}
-          >
+          <OpeningObject key={o.id} opening={o} wall={wall} props={props} setDragging={setDragging}>
             {props.walk && o.kind === 'door' && (
               <mesh position={[0, h / 2, 0]} userData={{ walkDoorTarget: true }}>
                 <boxGeometry args={[w, h, 0.006]} />
@@ -474,7 +556,7 @@ function Walls({ props }: { props: SceneProps }) {
                 )}
               </>
             )}
-          </group>
+          </OpeningObject>
         )
       })}
     </>
@@ -547,7 +629,7 @@ function FloorContent({
           )}
         </group>
       ))}
-      <Walls props={props} />
+      <Walls props={props} setDragging={setDragging} />
       {props.plan.items.map((item) => (
         <Furniture key={item.id} item={item} props={props} setDragging={setDragging} />
       ))}
@@ -600,7 +682,8 @@ function World({ props }: { props: SceneProps }) {
                 selected: null,
                 tool: 'orbit',
                 onSelect: () => {},
-                onMove: () => {},
+                onTransform: () => {},
+                onMoveOpening: () => {},
               }}
               setDragging={setDragging}
             />

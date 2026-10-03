@@ -2,9 +2,9 @@ import {
   ChevronDown,
   DoorOpen,
   Grid2X2,
+  Hand,
   Layers,
   MousePointer2,
-  Move,
   RotateCw,
   Ruler,
 } from 'lucide-react'
@@ -52,13 +52,15 @@ export default function EditorToolDock({
       >
         <MousePointer2 size={18} />
       </ToolButton>
-      <ToolButton
-        label="Move furniture (M)"
-        active={tool === 'move'}
+      <button
+        className={`icon-button ${tool === 'move' ? 'active' : ''}`}
+        title="Hand mode: move furniture, doors and windows; resize furniture with handles (H / M)"
+        aria-label="Hand mode (H / M)"
+        aria-pressed={tool === 'move'}
         onClick={() => onTool('move')}
       >
-        <Move size={18} />
-      </ToolButton>
+        <Hand size={18} />
+      </button>
       <span className={`dock-divider ${view === '2d' ? 'dock-divider--compact-hidden' : ''}`} />
       <ToolButton
         label="Rotate selected item 90° (R)"
