@@ -7,13 +7,32 @@
     BlinkMacSystemFont,
     'Segoe UI',
     sans-serif;
-  color: #303b32;
-  background: #f5f5ef;
+  color: var(--text);
+  background: var(--app-background);
   font-synthesis: none;
   font-weight: 400;
-  --green: #315b47;
-  --line: #e6e8df;
-  --panel: #fbfcf8;
+  color-scheme: dark;
+  --app-background: #202225;
+  --canvas: #25292d;
+  --panel: #26292c;
+  --surface: #303438;
+  --surface-hover: #3d4246;
+  --field: #202326;
+  --field-border: #626b71;
+  --overlay: #2b2f33;
+  --text: #e4e8e4;
+  --text-muted: #b5bbb7;
+  --line: #3d4449;
+  --green: #add3bb;
+  --accent-soft: #304e3d;
+  --accent-solid: #3c634b;
+  --accent-hover: #466f55;
+  --focus-ring: #b6d2bf33;
+  --warning: #ebc493;
+  --warning-soft: #463e33;
+  --warning-border: #8a7458;
+  --danger: #eeb29f;
+  --danger-soft: #473632;
   --app-header-height: 48px;
   --status-height: 34px;
   --ease: cubic-bezier(0.23, 1, 0.32, 1);
@@ -45,7 +64,7 @@ button:disabled {
 }
 
 button:focus-visible {
-  outline: 2px solid #669a7c;
+  outline: 2px solid var(--green);
   outline-offset: 3px;
 }
 
@@ -63,7 +82,7 @@ input {
 }
 
 input:focus-visible {
-  outline: 2px solid #669a7c;
+  outline: 2px solid var(--green);
   outline-offset: 3px;
 }
 
@@ -74,8 +93,13 @@ select {
 }
 
 select:focus-visible {
-  outline: 2px solid #669a7c;
+  outline: 2px solid var(--green);
   outline-offset: 3px;
+}
+
+option {
+  background: var(--field);
+  color: var(--text);
 }
 
 h1,
@@ -105,17 +129,17 @@ p {
   align-items: center;
   flex-shrink: 0;
   border-radius: 7px;
-  color: #777f72;
+  color: var(--text-muted);
 }
 
 .icon-button:hover:not(:disabled) {
-  background: #ecefe5;
+  background: var(--surface-hover);
   color: var(--green);
 }
 
 .icon-button.active {
-  background: #e3eada;
-  color: #315b47;
+  background: var(--accent-soft);
+  color: var(--green);
 }
 
 .primary-button,
@@ -133,52 +157,52 @@ p {
 }
 
 .primary-button {
-  background: #315b47;
-  color: #fff;
+  background: var(--accent-solid);
+  color: var(--text);
 }
 
 .primary-button:hover {
-  background: #254b38;
+  background: var(--accent-hover);
 }
 
 .outline-button {
-  border: 1px solid #dce0d3;
-  background: #fbfcf8;
+  border: 1px solid var(--line);
+  background: var(--surface);
 }
 
 .outline-button:hover {
-  background: #eaf0e3;
+  background: var(--surface-hover);
 }
 
 .quiet-button {
-  color: #626d5e;
+  color: var(--text);
 }
 
 .quiet-button:hover {
-  background: #eaf0e3;
+  background: var(--surface-hover);
 }
 
 kbd {
   font-family: inherit;
-  border: 1px solid #e0e7d6;
+  border: 1px solid var(--line);
   border-radius: 4px;
   padding: 3px 5px;
   font-size: 9px;
-  box-shadow: 0 1px 1px #48643712;
-  background: #f4f7ed;
-  color: #7e8d6c;
+  box-shadow: 0 1px 1px #00000029;
+  background: var(--surface);
+  color: var(--text-muted);
 }
 
 .eyebrow {
   font-size: 9px;
   letter-spacing: 1.35px;
-  color: #92998c;
+  color: var(--text-muted);
   font-weight: 650;
   line-height: 1.4;
 }
 
 .small-description {
-  color: #8a947e;
+  color: var(--text-muted);
   margin: 0 3px 18px;
   font-size: 12px;
   line-height: 1.7;
@@ -190,8 +214,8 @@ kbd {
   gap: 9px;
   padding: 14px 10px;
   border-radius: 7px;
-  background: #f0f3e7;
-  color: #81936c;
+  background: var(--surface);
+  color: var(--text-muted);
   margin-top: 22px;
 }
 
@@ -203,7 +227,7 @@ kbd {
 .tip-card p {
   font-size: 10px;
   line-height: 1.7;
-  color: #899879;
+  color: var(--text-muted);
   margin-top: 5px;
 }
 
@@ -219,7 +243,7 @@ kbd {
   display: block;
   font-size: 10px;
   line-height: 1.4;
-  color: #849176;
+  color: var(--text-muted);
   margin-bottom: 6px;
   font-weight: 450;
 }
@@ -231,25 +255,25 @@ kbd {
   margin: 24px 0 14px;
   padding-top: 20px;
   border-top: 1px solid var(--line);
-  color: #9fac91;
+  color: var(--text-muted);
 }
 
 .section-title h3 {
   font-size: 11px;
-  color: #526944;
+  color: var(--text);
   font-weight: 550;
 }
 
 .name-field input {
   display: block;
   width: 100%;
-  border: 1px solid #dfe5d5;
+  border: 1px solid var(--field-border);
   border-radius: 6px;
-  background: #fdfef9;
+  background: var(--field);
   padding: 9px 10px;
   margin-top: 7px;
   font-size: 11px;
-  color: #4e6241;
+  color: var(--text);
 }
 
 .select-field {
@@ -260,9 +284,9 @@ kbd {
   display: block;
   width: 100%;
   padding: 9px 8px;
-  border: 1px solid #dfe5d5;
-  background: #fdfef9;
-  color: #60774e;
+  border: 1px solid var(--field-border);
+  background: var(--field);
+  color: var(--text);
   border-radius: 6px;
   font-size: 11px;
   margin-top: 7px;
@@ -270,12 +294,12 @@ kbd {
 
 .unit-select {
   appearance: none;
-  border: 1px solid #e1e7d8;
+  border: 1px solid var(--field-border);
   padding: 4px 7px;
   border-radius: 5px;
   font-size: 9px;
-  color: #869678;
-  background: #f1f5e9;
+  color: var(--text-muted);
+  background: var(--field);
   outline: none;
 }
 
@@ -293,17 +317,17 @@ kbd {
   display: flex;
   align-items: center;
   width: 100%;
-  border: 1px solid #dfe5d5;
+  border: 1px solid var(--field-border);
   border-radius: 6px;
-  background: #fdfef9;
+  background: var(--field);
   overflow: hidden;
   min-height: 34px;
   transition: border-color 150ms ease;
 }
 
 .number-input:focus-within {
-  border-color: #91ad7b;
-  box-shadow: 0 0 0 2px #91ad7b18;
+  border-color: var(--green);
+  box-shadow: 0 0 0 2px var(--focus-ring);
 }
 
 .number-input input {
@@ -312,7 +336,7 @@ kbd {
   width: 100%;
   border: 0;
   outline: none;
-  color: #4d6341;
+  color: var(--text);
   background: transparent;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
@@ -331,24 +355,24 @@ kbd {
 
 .number-input > span {
   font-size: 10px;
-  color: #a4af95;
+  color: var(--text-muted);
   padding-right: 10px;
   flex-shrink: 0;
 }
 
 .number-input.invalid {
-  border-color: #bc7760;
-  background: #fcf1e9;
+  border-color: var(--danger);
+  background: var(--danger-soft);
 }
 
 .number-input.is-disabled {
-  background: #f1f4e9;
+  background: var(--surface);
   opacity: 0.65;
 }
 
 .field-help {
   font-size: 9px;
-  color: #a0ac91;
+  color: var(--text-muted);
   line-height: 1.7;
   margin: 0 0 6px;
 }
@@ -356,7 +380,7 @@ kbd {
 .build-help {
   font-size: var(--build-font-size, 10px);
   line-height: 1.7;
-  color: #829077;
+  color: var(--text-muted);
   margin: 10px 0 13px;
 }
 
@@ -365,7 +389,7 @@ kbd {
   flex-direction: column;
   gap: 6px;
   font-size: var(--build-font-size, 10px);
-  color: #6e8165;
+  color: var(--text-muted);
   margin: 12px 0;
 }
 
@@ -373,10 +397,10 @@ kbd {
 .build-field select {
   width: 100%;
   padding: 8px;
-  border: 1px solid #dbe3d2;
+  border: 1px solid var(--field-border);
   border-radius: 5px;
-  background: #fff;
-  color: #425e3a;
+  background: var(--field);
+  color: var(--text);
   font-size: var(--build-input-font-size, 11px);
 }
 

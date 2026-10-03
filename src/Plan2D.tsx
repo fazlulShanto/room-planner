@@ -18,11 +18,15 @@ import { projectToWall, snapBuildingPoint } from './building'
 import type { DrawingProps } from './BuildPanel'
 import { canColorRoom } from './finishes'
 import type { SceneProps } from './Scene'
+import FurniturePlanSymbol from './FurniturePlanSymbol'
 
 export default function Plan2D(
   props: SceneProps & { unit: Unit; showClearance: boolean; drawing?: DrawingProps },
 ) {
   const svg = useRef<SVGSVGElement>(null)
+  const orderedItems = [...props.plan.items].sort(
+    (a, b) => a.elevation + a.height - b.elevation - b.height,
+  )
   const [anchor, setAnchor] = useState<Point | null>(null),
     [preview, setPreview] = useState<Point | null>(null)
   const drawDown = useRef<{ point: Point; x: number; y: number; fresh: boolean } | null>(null)
@@ -201,7 +205,7 @@ export default function Plan2D(
     >
       <defs>
         <pattern id="plan-grid" width="12" height="12" patternUnits="userSpaceOnUse">
-          <circle cx="0" cy="0" r=".42" fill="#cccfc4" />
+          <circle cx="0" cy="0" r=".42" fill="#74797c" />
         </pattern>
       </defs>
       <rect
@@ -228,8 +232,8 @@ export default function Plan2D(
               .map((p) => p.join(','))
               .join(' ')}
             fill={canColorRoom(r) ? (props.plan.finishes?.[r.id]?.floor ?? r.color) : r.color}
-            fillOpacity={canColorRoom(r) && props.plan.finishes?.[r.id]?.floor ? 1 : 0.45}
-            stroke={props.selected === r.id ? '#3d876a' : 'none'}
+            fillOpacity={canColorRoom(r) && props.plan.finishes?.[r.id]?.floor ? 1 : 0.85}
+            stroke={props.selected === r.id ? 'var(--green)' : 'none'}
             strokeWidth={1}
           />
           <text className="room-label" x={r.x + r.width / 2} y={r.z + r.depth / 2 - 3}>
@@ -271,7 +275,7 @@ export default function Plan2D(
               y1={w.from[1]}
               x2={w.to[0]}
               y2={w.to[1]}
-              stroke={props.selected === w.id ? '#3d876a88' : 'transparent'}
+              stroke={props.selected === w.id ? '#b6d2bf88' : 'transparent'}
               strokeWidth={w.thickness + 5}
             />
             {props.selected === w.id && (
@@ -280,7 +284,7 @@ export default function Plan2D(
                 y={(w.from[1] + w.to[1]) / 2 - 7}
                 fontSize="5"
                 textAnchor="middle"
-                fill="#315b47"
+                fill="var(--green)"
               >
                 Wall {i + 1} ·{' '}
                 {formatDimension(Math.hypot(w.to[0] - w.from[0], w.to[1] - w.from[1]), props.unit)}
@@ -371,7 +375,7 @@ export default function Plan2D(
               />
             )
           })}
-      {props.plan.items.map((item) => {
+      {orderedItems.map((item) => {
         const selected = props.selected === item.id,
           issue = props.issueIds.has(item.id)
         return (
@@ -544,6 +548,7 @@ export default function Plan2D(
                 )}
               </g>
             )}
+            <FurniturePlanSymbol item={item} />
             {item.kind !== 'bed' && (
               <text
                 className="item-plan-label"
@@ -570,13 +575,13 @@ export default function Plan2D(
                     width="3.4"
                     height="3.4"
                     fill="#f8fbf5"
-                    stroke="#276c51"
+                    stroke="var(--green)"
                     strokeWidth=".9"
                   />
                 ))}
                 <path
                   d={`M${-item.width / 2} ${item.depth / 2 + 6}h${item.width}`}
-                  stroke="#276c51"
+                  stroke="var(--green)"
                   strokeWidth=".6"
                 />
                 <text className="selection-dimension" x="0" y={item.depth / 2 + 13}>
@@ -589,13 +594,13 @@ export default function Plan2D(
         )
       })}
       <g transform="translate(249 10)" pointerEvents="none">
-        <path d="M0 15V0m-3 5 3-5 3 5" stroke="#7b8175" fill="none" strokeWidth=".8" />
+        <path d="M0 15V0m-3 5 3-5 3 5" stroke="var(--text-muted)" fill="none" strokeWidth=".8" />
         <text x="0" y="-5" className="compass-label">
           N
         </text>
       </g>
       <g transform="translate(0 479)" pointerEvents="none">
-        <path d="M0 -2V2m0-2h48m0-2v4" stroke="#747b6e" strokeWidth=".7" />
+        <path d="M0 -2V2m0-2h48m0-2v4" stroke="var(--text-muted)" strokeWidth=".7" />
         <text x="24" y="10" className="compass-label">
           4 FEET
         </text>
@@ -608,8 +613,8 @@ export default function Plan2D(
               y={Math.min(anchor[1], preview[1])}
               width={Math.abs(preview[0] - anchor[0])}
               height={Math.abs(preview[1] - anchor[1])}
-              fill="#3d876a18"
-              stroke="#3d876a"
+              fill="#b6d2bf18"
+              stroke="var(--green)"
               strokeWidth={props.drawing.thickness}
             />
           ) : (
@@ -618,17 +623,17 @@ export default function Plan2D(
               y1={anchor[1]}
               x2={preview[0]}
               y2={preview[1]}
-              stroke="#3d876a"
+              stroke="var(--green)"
               strokeWidth={props.drawing!.thickness}
             />
           )}
-          <circle cx={preview[0]} cy={preview[1]} r={3} fill="#3d876a" />
+          <circle cx={preview[0]} cy={preview[1]} r={3} fill="var(--green)" />
           <text
             x={(anchor[0] + preview[0]) / 2}
             y={(anchor[1] + preview[1]) / 2 - 9}
             textAnchor="middle"
             fontSize="6"
-            fill="#315b47"
+            fill="var(--green)"
           >
             {props.drawing?.tool === 'rectangle'
               ? `${formatDimension(Math.abs(preview[0] - anchor[0]), props.unit)} × ${formatDimension(Math.abs(preview[1] - anchor[1]), props.unit)}`

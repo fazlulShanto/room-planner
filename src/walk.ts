@@ -1,6 +1,7 @@
 import {
   roomContains,
   itemFootprints,
+  isFloorRug,
   wallBlocks,
   wallPoint,
   wallAngle,
@@ -55,7 +56,7 @@ export function createWalkSpace(
       .flatMap((w) => wallBlocks(w, plan.openings, plan.ceiling))
       .filter((b) => b.elevation < eyeHeight && b.elevation + b.height > 0),
     ...plan.items
-      .filter((i) => i.elevation < eyeHeight && i.elevation + i.height > 0)
+      .filter((i) => !isFloorRug(i) && i.elevation < eyeHeight && i.elevation + i.height > 0)
       .flatMap(itemFootprints),
   ]
   const thresholds = plan.openings

@@ -1,15 +1,17 @@
-import { useRef, type ComponentProps } from 'react'
+import { useRef, useState, type ComponentProps } from 'react'
 import {
   AlertTriangle,
   ArrowDownToLine,
   ArrowUpFromLine,
   Check,
   House,
+  Share2,
   Redo2,
   Undo2,
 } from 'lucide-react'
 import { ProjectMenu } from '../ProjectControls'
 import ToolButton from './ToolButton'
+import { ShareDialog } from './ProjectShare'
 
 type Props = {
   projects: ComponentProps<typeof ProjectMenu>
@@ -33,13 +35,14 @@ export default function EditorHeader({
   onExport,
 }: Props) {
   const fileInput = useRef<HTMLInputElement>(null)
+  const [sharing, setSharing] = useState(false)
   return (
     <header className="app-header">
       <div className="brand">
         <span className="brand-mark">
           <House size={22} strokeWidth={1.7} />
         </span>
-        <span>
+        <span className="brand-wordmark">
           roomwise<span className="brand-period">.</span>
         </span>
       </div>
@@ -71,9 +74,17 @@ export default function EditorHeader({
           <ArrowUpFromLine size={15} />
           Import
         </button>
-        <button className="primary-button export-button" onClick={onExport}>
+        <button
+          className="outline-button export-button"
+          aria-label="Export layout"
+          onClick={onExport}
+        >
           <ArrowDownToLine size={15} />
           Export layout
+        </button>
+        <button className="primary-button share-button" onClick={() => setSharing(true)}>
+          <Share2 size={15} />
+          Share
         </button>
         <input
           ref={fileInput}
@@ -91,6 +102,13 @@ export default function EditorHeader({
           }}
         />
       </div>
+      {sharing && (
+        <ShareDialog
+          project={projects.project}
+          onClose={() => setSharing(false)}
+          onExport={onExport}
+        />
+      )}
     </header>
   )
 }

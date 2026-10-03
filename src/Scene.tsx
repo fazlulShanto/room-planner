@@ -7,7 +7,7 @@ import SceneLighting from './SceneLighting'
 import { createDollhouseCamera, fitDollhouseCamera } from './camera'
 import { canColorRoom, roomFinishes } from './finishes'
 import { RoomFloor, RoomCeiling, WallStructure, useWallHeights } from './Architecture'
-import { homeFurnitureParts } from './homeFurniture'
+import { homeFurnitureParts, type FurniturePart } from './homeFurniture'
 import type { WalkInput } from './walk'
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
 import {
@@ -121,6 +121,25 @@ function Bed({ item }: { item: Item }) {
     </>
   )
 }
+function FurniturePartMesh({ part }: { part: FurniturePart }) {
+  const size = part.size.map(m) as [number, number, number]
+  const position = part.position.map(m) as [number, number, number]
+  if (!part.shape || part.shape === 'box') return <Box {...part} size={size} position={position} />
+  return (
+    <mesh position={position} scale={size} castShadow receiveShadow>
+      {part.shape === 'cylinder' ? (
+        <cylinderGeometry args={[0.5, 0.5, 1, 24]} />
+      ) : (
+        <sphereGeometry args={[0.5, 20, 12]} />
+      )}
+      <meshStandardMaterial
+        color={part.color}
+        roughness={part.roughness}
+        metalness={part.metalness}
+      />
+    </mesh>
+  )
+}
 function FurnitureShape({ item }: { item: Item }) {
   const w = m(item.width),
     d = m(item.depth),
@@ -130,12 +149,7 @@ function FurnitureShape({ item }: { item: Item }) {
     return (
       <>
         {homeParts.map((part, i) => (
-          <Box
-            key={i}
-            {...part}
-            size={part.size.map(m) as [number, number, number]}
-            position={part.position.map(m) as [number, number, number]}
-          />
+          <FurniturePartMesh key={i} part={part} />
         ))}
       </>
     )
@@ -556,7 +570,7 @@ function World({ props }: { props: SceneProps }) {
   )
   return (
     <>
-      <color attach="background" args={['#111923']} />
+      <color attach="background" args={['#25292d']} />
       {props.walk ? (
         <WalkControls
           {...props.walkControls}
@@ -571,10 +585,10 @@ function World({ props }: { props: SceneProps }) {
       <SceneLighting plan={overview} settings={props.lighting} walk={props.walk} />
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[3, -0.22, 5]} receiveShadow>
         <planeGeometry args={[300, 300]} />
-        <meshStandardMaterial color="#17212c" roughness={1} />
+        <meshStandardMaterial color="#24292e" roughness={1} />
       </mesh>
       {props.grid && (
-        <gridHelper args={[152.4, 500, '#617185', '#354354']} position={[3, -0.213, 5]} />
+        <gridHelper args={[152.4, 500, '#58636b', '#3a4147']} position={[3, -0.213, 5]} />
       )}
       {props.stackedFloors ? (
         props.stackedFloors.map((f) => (

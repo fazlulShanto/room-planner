@@ -3,6 +3,7 @@ import { useWorkspace } from './workspace/useWorkspace'
 import Inspector from './editor/Inspector'
 import ObjectList from './editor/ObjectList'
 import EditorHeader from './editor/EditorHeader'
+import { SharedLinkNotice } from './editor/ProjectShare'
 import LibraryPanel, { type LibrarySection } from './editor/LibraryPanel'
 import EditorViewport, { type EditorSceneProps, type EditorView } from './editor/EditorViewport'
 import EditorToolbar from './editor/EditorToolbar'
@@ -46,6 +47,8 @@ export default function App() {
     notice,
     setNotice,
     saveState,
+    sharedLink,
+    dismissSharedLink,
     commitWorkspace,
     updateProject,
     updatePlan,
@@ -298,6 +301,7 @@ export default function App() {
   }
   return (
     <div className="app-shell">
+      {sharedLink && <SharedLinkNotice error={sharedLink.error} onClose={dismissSharedLink} />}
       <EditorHeader
         projects={{
           workspace,

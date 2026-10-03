@@ -23,10 +23,10 @@
   grid-template-columns: repeat(3, 36px);
   gap: 4px;
   padding: 7px;
-  border: 1px solid #52606b80;
-  background: #17232dd9;
+  border: 1px solid var(--line);
+  background: var(--overlay);
   border-radius: 12px;
-  box-shadow: 0 6px 24px #0003;
+  box-shadow: 0 6px 24px #00000029;
 }
 
 .walk-control {
@@ -35,25 +35,25 @@
   align-items: center;
   justify-content: center;
   gap: 3px;
-  border: 1px solid #52647466;
+  border: 1px solid var(--line);
   border-radius: 6px;
-  background: #334451c9;
-  color: #eff2ee;
+  background: var(--surface);
+  color: var(--text);
   touch-action: none;
   user-select: none;
 }
 
 .walk-control span {
   font-size: 8px;
-  color: #b2c0ca;
+  color: var(--text-muted);
 }
 
 .walk-control:hover {
-  background: #52645e;
+  background: var(--surface-hover);
 }
 
 .walk-control:active {
-  background: #768d75;
+  background: var(--accent-soft);
 }
 
 .walk-caption {
@@ -61,17 +61,17 @@
   align-items: center;
   gap: 10px;
   justify-self: center;
-  color: #dae2e6;
+  color: var(--text);
   padding: 5px 7px;
-  background: #17232ddb;
-  border: 1px solid #53616b70;
+  background: var(--overlay);
+  border: 1px solid var(--line);
   border-radius: 7px;
   pointer-events: auto;
   white-space: nowrap;
 }
 
 .walk-caption strong {
-  color: #f6f5e8;
+  color: var(--text);
   font-weight: 600;
 }
 
@@ -91,9 +91,9 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  background: #f0f4e9;
-  color: #304539;
-  border: 1px solid #dde7d5;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
   border-radius: 7px;
   padding: 9px 10px;
   font-size: 11px;
@@ -102,20 +102,20 @@
 
 .walk-exit kbd {
   font-size: 8px;
-  color: #74806c;
+  color: var(--text-muted);
 }
 
 .workspace-walk .canvas-top-note {
   padding: 7px 9px;
-  background: #17232dda;
-  border: 1px solid #65748255;
+  background: var(--overlay);
+  border: 1px solid var(--line);
   border-radius: 6px;
-  color: #dce4ea;
+  color: var(--text);
   top: 68px;
 }
 
 .workspace-walk .canvas-note-mode {
-  color: #c0ccd5;
+  color: var(--text-muted);
 }
 
 .walk-aim {
@@ -169,8 +169,8 @@
   transform: translateX(-50%);
   max-width: calc(100% - 28px);
   border-radius: 7px;
-  background: #17232de8;
-  color: #eaf1e5;
+  background: var(--overlay);
+  color: var(--text);
   padding: 8px 11px;
   font-size: 11px;
   text-align: center;
@@ -180,12 +180,12 @@
   justify-content: center;
   gap: 8px;
   pointer-events: auto;
-  border: 1px solid #a0bd8599;
+  border: 1px solid var(--line);
 }
 
 .walk-door-prompt kbd {
-  background: #e9f0df;
-  color: #385c36;
+  background: var(--surface);
+  color: var(--text);
   border: 0;
   padding: 2px 6px;
 }
@@ -210,7 +210,7 @@
 }
 
 .walk-height-control > summary strong {
-  border-bottom: 1px dashed #99b486;
+  border-bottom: 1px dashed var(--line);
   padding-bottom: 1px;
 }
 
@@ -220,11 +220,11 @@
   left: 0;
   width: 240px;
   padding: 15px;
-  border: 1px solid #637567;
+  border: 1px solid var(--line);
   border-radius: 9px;
-  background: #23312a;
-  color: #eaf1e5;
-  box-shadow: 0 8px 25px #0005;
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: 0 8px 25px #00000029;
 }
 
 .walk-height-popover > label {
@@ -236,7 +236,7 @@
 .walk-height-popover > input {
   width: 100%;
   margin: 16px 0 12px;
-  accent-color: #a5c78c;
+  accent-color: var(--green);
 }
 
 .walk-height-presets {
@@ -247,15 +247,15 @@
 .walk-height-presets button {
   flex: 1;
   padding: 6px 4px;
-  border: 1px solid #61715c;
+  border: 1px solid var(--line);
   border-radius: 5px;
-  color: #d6e3cc;
+  color: var(--text);
   font-size: 9px;
   white-space: nowrap;
 }
 
 .walk-height-presets button:hover {
-  background: #425b3d;
+  background: var(--surface-hover);
 }
 
 .walk-look-modes {
@@ -263,7 +263,7 @@
   justify-content: center;
   gap: 4px;
   padding-left: 10px;
-  border-left: 1px solid #60706b66;
+  border-left: 1px solid var(--line);
 }
 
 .walk-look-modes > button {
@@ -272,16 +272,16 @@
   justify-content: center;
   gap: 5px;
   padding: 6px 8px;
-  border: 1px solid #5b706a;
+  border: 1px solid var(--line);
   border-radius: 5px;
-  color: #ccdacf;
+  color: var(--text);
   font-size: 10px;
 }
 
 .walk-look-modes > button[aria-pressed='true'] {
-  background: #dbe9d0;
-  color: #324d35;
-  border-color: #dbe9d0;
+  background: var(--accent-soft);
+  color: var(--green);
+  border-color: var(--green);
 }
 
 @media (max-width: 1250px) {

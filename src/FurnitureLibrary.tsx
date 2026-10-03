@@ -1,5 +1,21 @@
+import { useState } from 'react'
 import {
   Archive,
+  Baby,
+  Bath,
+  BookOpen,
+  CookingPot,
+  Flower2,
+  Footprints,
+  Lamp,
+  LampFloor,
+  Microwave,
+  RectangleHorizontal,
+  ShowerHead,
+  Toilet,
+  Tv,
+  Shirt,
+  type LucideIcon,
   Armchair,
   BedDouble,
   Box,
@@ -16,9 +32,10 @@ import {
   WashingMachine,
   X,
 } from 'lucide-react'
-import { CATALOG, round, type ItemKind } from './model'
+import { round, type ItemKind } from './model'
+import { CATALOG, CATALOG_CATEGORIES, filterCatalog, type CatalogCategory } from './catalog'
 
-export const FURNITURE_ICONS = {
+export const FURNITURE_ICONS: Record<ItemKind, LucideIcon> = {
   bed: BedDouble,
   cabinet: Archive,
   fridge: Refrigerator,
@@ -35,18 +52,40 @@ export const FURNITURE_ICONS = {
   'sofa-corner': Sofa,
   'tea-table': Table2,
   chair: Armchair,
+  nightstand: Archive,
+  dresser: Rows3,
+  crib: Baby,
+  'bunk-bed': BedDouble,
+  ottoman: Armchair,
+  bench: Sofa,
+  'console-table': Table2,
+  'tv-unit': Tv,
+  bookcase: BookOpen,
+  'shoe-rack': Rows3,
+  'side-table': Table2,
+  'office-chair': Armchair,
+  'bar-stool': Armchair,
+  'work-desk': Table2,
+  'kitchen-base': Archive,
+  'kitchen-sink': Bath,
+  'kitchen-island': Table2,
+  stove: CookingPot,
+  dishwasher: WashingMachine,
+  microwave: Microwave,
+  pantry: Columns2,
+  toilet: Toilet,
+  'squat-toilet': Footprints,
+  'bathroom-vanity': Bath,
+  bathtub: Bath,
+  shower: ShowerHead,
+  'floor-lamp': LampFloor,
+  'table-lamp': Lamp,
+  plant: Flower2,
+  rug: RectangleHorizontal,
+  mirror: PanelsTopLeft,
+  'coat-rack': Shirt,
+  'laundry-basket': Archive,
 }
-
-const groups: { name: string; kinds: ItemKind[] }[] = [
-  { name: 'Living', kinds: ['sofa-one', 'sofa-two', 'sofa-corner', 'tea-table'] },
-  {
-    name: 'Bedroom & storage',
-    kinds: ['bed', 'wardrobe', 'almirah', 'dressing', 'rack', 'cabinet'],
-  },
-  { name: 'Dining & work', kinds: ['dining', 'chair', 'desk'] },
-  { name: 'Appliances', kinds: ['fridge', 'washer'] },
-  { name: 'Make it yours', kinds: ['custom'] },
-]
 
 export default function FurnitureLibrary({
   query,
@@ -59,17 +98,12 @@ export default function FurnitureLibrary({
   onAdd: (kind: ItemKind) => void
   hasRooms: boolean
 }) {
-  const search = query.trim().toLowerCase()
-  const matches = groups
-    .map((group) => ({
-      ...group,
-      items: group.kinds
-        .map((kind) => CATALOG.find((item) => item.kind === kind)!)
-        .filter((item) =>
-          `${group.name} ${item.name} ${item.description}`.toLowerCase().includes(search),
-        ),
-    }))
-    .filter((group) => group.items.length)
+  const [category, setCategory] = useState<CatalogCategory | 'All'>('All')
+  const items = filterCatalog(query, category)
+  const matches = CATALOG_CATEGORIES.map((name) => ({
+    name,
+    items: items.filter((item) => item.category === name),
+  })).filter((group) => group.items.length)
 
   return (
     <div className="furniture-library">
@@ -78,7 +112,7 @@ export default function FurnitureLibrary({
           <Search size={17} />
           <input
             aria-label="Search furniture"
-            placeholder="Search furniture…"
+            placeholder="Search furniture, fixtures, decor…"
             value={query}
             onChange={(e) => onQuery(e.target.value)}
           />
@@ -88,6 +122,24 @@ export default function FurnitureLibrary({
             </button>
           )}
         </label>
+        <label className="catalog-category">
+          Category
+          <select
+            aria-label="Item category"
+            value={category}
+            onChange={(event) => setCategory(event.target.value as CatalogCategory | 'All')}
+          >
+            <option value="All">All categories</option>
+            {CATALOG_CATEGORIES.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <p role="status" aria-live="polite">
+          {items.length} of {CATALOG.length} items
+        </p>
         <p>
           {hasRooms
             ? 'Pick a piece. Make it your size.'
@@ -132,10 +184,16 @@ export default function FurnitureLibrary({
         {!matches.length && (
           <div className="library-empty" role="status">
             <Search size={24} />
-            <strong>No furniture found</strong>
-            <p>Try “sofa”, “storage”, or “table”.</p>
-            <button className="quiet-button" onClick={() => onQuery('')}>
-              Clear search
+            <strong>No items found</strong>
+            <p>Try another category or search for “sofa”, “sink”, or “lamp”.</p>
+            <button
+              className="quiet-button"
+              onClick={() => {
+                onQuery('')
+                setCategory('All')
+              }}
+            >
+              Reset filters
             </button>
           </div>
         )}

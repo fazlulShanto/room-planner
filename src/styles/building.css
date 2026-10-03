@@ -9,14 +9,14 @@
   font-size: 15px;
   font-weight: 600;
   letter-spacing: -0.3px;
-  color: #425d3c;
+  color: var(--text);
   margin-bottom: 13px;
 }
 
 .build-panel h3 {
   text-transform: uppercase;
   letter-spacing: 0.9px;
-  color: #819177;
+  color: var(--text-muted);
   margin: 22px 0 8px;
   font-size: 11px;
 }
@@ -30,9 +30,9 @@
 .build-tools button {
   display: flex;
   align-items: center;
-  border: 1px solid #dce4d4;
-  background: #f5f8ef;
-  color: #607757;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
   min-height: 43px;
   padding: 10px;
   gap: 8px;
@@ -41,21 +41,21 @@
 }
 
 .build-tools button[aria-pressed='true'] {
-  background: #dfead5;
-  border-color: #9eb790;
-  color: #315b47;
+  background: var(--accent-soft);
+  border-color: var(--green);
+  color: var(--green);
 }
 
 .quick-room {
   margin: 18px 0;
-  border-top: 1px solid #e3e8dc;
-  border-bottom: 1px solid #e3e8dc;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   padding: 13px 0;
 }
 
 .quick-room summary {
   cursor: pointer;
-  color: #59724d;
+  color: var(--text);
   font-size: 11px;
 }
 
@@ -69,8 +69,8 @@
   gap: 8px;
   width: 100%;
   text-align: left;
-  border-bottom: 1px solid #e5eadf;
-  color: #62765b;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
   padding: 12px 5px;
   font-size: 12px;
 }
@@ -80,17 +80,17 @@
 }
 
 .build-room span {
-  color: #8d9a82;
+  color: var(--text-muted);
   font-size: 11px;
 }
 
 .build-room:hover {
-  background: #edf3e6;
+  background: var(--surface-hover);
 }
 
 .build-measure {
   font-size: 13px;
-  color: #506f44;
+  color: var(--text);
 }
 
 .build-inspector > button {

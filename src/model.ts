@@ -1,22 +1,8 @@
+import { CATALOG, type ItemKind } from './catalog.ts'
+export { CATALOG, type ItemKind } from './catalog.ts'
+
 // All stored dimensions are inches. Conversion to meters happens only in the renderer.
 export type Point = [number, number]
-export type ItemKind =
-  | 'bed'
-  | 'cabinet'
-  | 'fridge'
-  | 'washer'
-  | 'desk'
-  | 'dining'
-  | 'almirah'
-  | 'dressing'
-  | 'wardrobe'
-  | 'rack'
-  | 'sofa-one'
-  | 'sofa-two'
-  | 'sofa-corner'
-  | 'tea-table'
-  | 'chair'
-  | 'custom'
 export type Room = {
   id: string
   name: string
@@ -103,177 +89,6 @@ export function formatDimension(n: number, unit: Unit = 'imperial'): string {
     inches = round(total - feet * 12)
   return `${n < 0 ? '−' : ''}${feet ? `${feet}′` : ''}${inches || !feet ? `${feet ? ' ' : ''}${inches}″` : ''}`
 }
-export const CATALOG: {
-  kind: ItemKind
-  name: string
-  description: string
-  width: number
-  depth: number
-  height: number
-  elevation: number
-  color: string
-}[] = [
-  {
-    kind: 'bed',
-    name: 'Bed',
-    description: 'Frame, mattress & pillows',
-    width: 60,
-    depth: 84,
-    height: 36,
-    elevation: 0,
-    color: '#889f8c',
-  },
-  {
-    kind: 'almirah',
-    name: 'Steel almirah',
-    description: 'Steel double doors & lock',
-    width: 36,
-    depth: 20,
-    height: 72,
-    elevation: 0,
-    color: '#849a99',
-  },
-  {
-    kind: 'dressing',
-    name: 'Dressing table',
-    description: 'Mirror, drawers & cabinet',
-    width: 36,
-    depth: 18,
-    height: 66,
-    elevation: 0,
-    color: '#b28c69',
-  },
-  {
-    kind: 'wardrobe',
-    name: 'Wardrobe',
-    description: 'Three wooden doors',
-    width: 48,
-    depth: 22,
-    height: 72,
-    elevation: 0,
-    color: '#a48262',
-  },
-  {
-    kind: 'rack',
-    name: 'RFL rack',
-    description: 'Three open plastic shelves',
-    width: 20,
-    depth: 12,
-    height: 27,
-    elevation: 0,
-    color: '#578799',
-  },
-  {
-    kind: 'sofa-one',
-    name: 'One-seat sofa',
-    description: 'Upholstered armchair',
-    width: 34,
-    depth: 34,
-    height: 34,
-    elevation: 0,
-    color: '#a3a18b',
-  },
-  {
-    kind: 'sofa-two',
-    name: 'Two-seat sofa',
-    description: 'Two cushions & padded arms',
-    width: 60,
-    depth: 34,
-    height: 34,
-    elevation: 0,
-    color: '#a3a18b',
-  },
-  {
-    kind: 'sofa-corner',
-    name: 'Corner sofa',
-    description: 'L-shaped with left or right return',
-    width: 96,
-    depth: 66,
-    height: 34,
-    elevation: 0,
-    color: '#899d99',
-  },
-  {
-    kind: 'tea-table',
-    name: 'Tea table',
-    description: 'Low table for the sofa set',
-    width: 36,
-    depth: 20,
-    height: 18,
-    elevation: 0,
-    color: '#b99570',
-  },
-  {
-    kind: 'cabinet',
-    name: 'Wall cabinet',
-    description: 'Adjustable mounting height',
-    width: 36,
-    depth: 14,
-    height: 30,
-    elevation: 54,
-    color: '#c0a583',
-  },
-  {
-    kind: 'fridge',
-    name: 'Refrigerator',
-    description: 'Full-height appliance',
-    width: 30,
-    depth: 28,
-    height: 68,
-    elevation: 0,
-    color: '#b8c4c2',
-  },
-  {
-    kind: 'washer',
-    name: 'Washing machine',
-    description: 'Front-loading appliance',
-    width: 27,
-    depth: 27,
-    height: 38,
-    elevation: 0,
-    color: '#e6e7e3',
-  },
-  {
-    kind: 'desk',
-    name: 'Reading table',
-    description: 'Your everyday workspace',
-    width: 42,
-    depth: 24,
-    height: 30,
-    elevation: 0,
-    color: '#c5a17e',
-  },
-  {
-    kind: 'dining',
-    name: 'Dining table',
-    description: 'Table footprint, without chairs',
-    width: 60,
-    depth: 36,
-    height: 30,
-    elevation: 0,
-    color: '#b18b69',
-  },
-  {
-    kind: 'chair',
-    name: 'Chair',
-    description: 'Wooden seat & slatted back',
-    width: 41 / 2.54,
-    depth: 45 / 2.54,
-    height: 100 / 2.54,
-    elevation: 0,
-    color: '#b48858',
-  },
-  {
-    kind: 'custom',
-    name: 'Custom object',
-    description: 'Anything, in any size',
-    width: 24,
-    depth: 24,
-    height: 24,
-    elevation: 0,
-    color: '#c2937c',
-  },
-]
 
 export function createInitialPlan(): Plan {
   const wall = (id: string, from: Point, to: Point, thickness = 6): Wall => ({
@@ -570,6 +385,10 @@ export function doorClearance(opening: Opening, wall: Wall): Rect {
     rotation: wallAngle(wall),
   }
 }
+// Only thin rugs on the floor permit furniture and walking over them.
+export const isFloorRug = (item: Item) =>
+  item.kind === 'rug' && item.elevation === 0 && item.height <= 1
+
 export function checkItem(item: Item, plan: Plan): Issue[] {
   const issues: Issue[] = [],
     room = plan.rooms.find((r) => r.id === item.roomId),
@@ -583,6 +402,8 @@ export function checkItem(item: Item, plan: Plan): Issue[] {
   for (const other of plan.items) {
     if (
       other.id !== item.id &&
+      !isFloorRug(item) &&
+      !isFloorRug(other) &&
       heightOverlap(item, other) &&
       footprints.some((a) => itemFootprints(other).some((b) => rectanglesOverlap(a, b)))
     )
@@ -600,6 +421,7 @@ export function checkItem(item: Item, plan: Plan): Issue[] {
     const wall = plan.walls.find((w) => w.id === o.wallId)
     if (
       wall &&
+      !isFloorRug(item) &&
       item.elevation < o.height &&
       footprints.some((a) => rectanglesOverlap(a, doorClearance(o, wall)))
     )
@@ -618,7 +440,7 @@ export function placeNewItem(plan: Plan, kind: ItemKind, roomId: string): Item {
       plan.rooms.find((r) => r.id === 'room3') ||
       plan.rooms[0]
   if (!room) throw new Error('Draw a closed room before adding furniture.')
-  const { description: _description, ...properties } = preset
+  const { description: _description, category: _category, ...properties } = preset
   const item: Item = {
     ...properties,
     id: crypto.randomUUID(),
@@ -629,8 +451,8 @@ export function placeNewItem(plan: Plan, kind: ItemKind, roomId: string): Item {
     locked: false,
   }
   const candidates: Point[] = []
-  // Start wall cabinets flush with the north interior wall, then try other free positions.
-  if (kind === 'cabinet') {
+  // Start wall cabinets and mirrors flush with the north interior wall, then try other free positions.
+  if (kind === 'cabinet' || kind === 'mirror') {
     for (let x = room.x + item.width / 2; x <= room.x + room.width - item.width / 2; x += 6)
       candidates.push([x, room.z + item.depth / 2])
   }

@@ -507,23 +507,15 @@ export default function Inspector({
                     )}
                   </div>
                 </div>
-                {[
-                  'almirah',
-                  'dressing',
-                  'wardrobe',
-                  'rack',
-                  'sofa-one',
-                  'sofa-two',
-                  'sofa-corner',
-                  'tea-table',
-                  'chair',
-                ].includes(item.kind) && (
+                {item.kind !== 'bed' && (
                   <p className="field-help assumption-note">
                     {item.kind === 'rack'
                       ? 'RFL-style plastic rack. Preset: your 20″ width × 12″ depth × 27″ height.'
                       : item.kind === 'chair'
                         ? 'Reference chair: 41 × 45 × 100 cm, with a 45 cm seat height and 37 cm back width. Height includes the back; the seat and back scale with your dimensions.'
                         : 'Preset dimensions are starting estimates. Enter your furniture’s actual measurements.'}
+                    {item.kind === 'rug' &&
+                      ' Rugs up to 1 inch thick on the floor allow furniture and walking over them.'}
                     {item.kind === 'dressing' &&
                       ' Height includes the mirror; depth includes the full base.'}
                   </p>

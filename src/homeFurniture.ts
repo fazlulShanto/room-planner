@@ -1,7 +1,9 @@
 import { sectionalDimensions, type Item } from './model.ts'
+import { additionalFurnitureParts } from './additionalFurniture.ts'
 
 type Vec3 = [number, number, number]
 export type FurniturePart = {
+  shape?: 'box' | 'cylinder' | 'ellipsoid'
   size: Vec3
   position: Vec3
   color: string
@@ -28,7 +30,7 @@ export function homeFurnitureParts(item: Item): FurniturePart[] | null {
       'cabinet',
     ].includes(item.kind)
   )
-    return null
+    return additionalFurnitureParts(item)
   const parts: FurniturePart[] = []
   const box = (
     size: Vec3,
