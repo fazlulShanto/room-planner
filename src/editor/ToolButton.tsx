@@ -6,11 +6,13 @@ export default function ToolButton({
   active,
   onClick,
   disabled,
+  controls,
 }: {
   children: ReactNode
   label: string
   active?: boolean
   disabled?: boolean
+  controls?: string
   onClick: () => void
 }) {
   return (
@@ -19,6 +21,7 @@ export default function ToolButton({
       title={label}
       aria-label={label}
       aria-pressed={active}
+      aria-controls={controls}
       onClick={onClick}
       disabled={disabled}
     >

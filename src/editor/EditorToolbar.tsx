@@ -1,5 +1,13 @@
 import type { ComponentProps } from 'react'
-import { Box, CircleHelp, Footprints, Grid2X2, Maximize, PanelRightOpen } from 'lucide-react'
+import {
+  Box,
+  Camera,
+  CircleHelp,
+  Footprints,
+  Grid2X2,
+  Maximize,
+  PanelRightOpen,
+} from 'lucide-react'
 import LightingControls from '../LightingControls'
 import ToolButton from './ToolButton'
 import type { EditorView } from './EditorViewport'
@@ -12,6 +20,7 @@ type Props = {
   onShowDetails: () => void
   lighting: ComponentProps<typeof LightingControls>
   onFit: () => void
+  onPhoto: () => void
   help: boolean
   onHelp: () => void
 }
@@ -24,6 +33,7 @@ export default function EditorToolbar({
   onShowDetails,
   lighting,
   onFit,
+  onPhoto,
   help,
   onHelp,
 }: Props) {
@@ -59,6 +69,9 @@ export default function EditorToolbar({
         </div>
       </div>
       <div className="toolbar-right">
+        <ToolButton label="Take a room photo" disabled={!hasRooms} onClick={onPhoto}>
+          <Camera size={17} />
+        </ToolButton>
         {!inspectorOpen && (
           <ToolButton label="Show details" onClick={onShowDetails}>
             <PanelRightOpen size={17} />
@@ -71,7 +84,7 @@ export default function EditorToolbar({
         >
           <Maximize size={16} />
         </ToolButton>
-        <ToolButton label="Show help" active={help} onClick={onHelp}>
+        <ToolButton label="Show help" controls="editor-help" active={help} onClick={onHelp}>
           <CircleHelp size={17} />
         </ToolButton>
       </div>

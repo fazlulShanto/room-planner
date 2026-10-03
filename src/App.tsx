@@ -11,6 +11,7 @@ import EditorToolbar from './editor/EditorToolbar'
 import EditorToolDock from './editor/EditorToolDock'
 import EditorHelp from './editor/EditorHelp'
 import EditorStatus from './editor/EditorStatus'
+import RoomPhoto from './editor/RoomPhoto'
 import { useEditorShortcuts } from './editor/useEditorShortcuts'
 import { changeItem, changeOpening } from './editor/planCommands'
 import { transformItem, type ItemTransform } from './editor/itemManipulation'
@@ -64,6 +65,7 @@ export default function App() {
   const floor = project.floors.find((f) => f.id === floorId) ?? project.floors[0]
   const plan = floor.plan
   const [buildingView, setBuildingView] = useState(false)
+  const [photoOpen, setPhotoOpen] = useState(false)
   const [drawingTool, setDrawingTool] = useState<DrawingTool>('select')
   const [drawThickness, setDrawThickness] = useState(6),
     [openingWidth, setOpeningWidth] = useState(32)
@@ -170,7 +172,7 @@ export default function App() {
     setBuildingView(false)
   }
   useEditorShortcuts({
-    enabled: view !== 'walk',
+    enabled: view !== 'walk' && !photoOpen,
     item,
     onUndo: undo,
     onRedo: redo,
@@ -513,6 +515,7 @@ export default function App() {
                 },
               }}
               onFit={() => setFitKey((k) => k + 1)}
+              onPhoto={() => setPhotoOpen(true)}
               help={help}
               onHelp={() => {
                 setHelp((v) => !v)
@@ -572,6 +575,17 @@ export default function App() {
           onChange={commit}
         />
       </div>
+      {photoOpen && (
+        <RoomPhoto
+          key={`${project.id}-${floor.id}`}
+          plan={plan}
+          lighting={lighting}
+          roomId={roomId}
+          projectName={project.name}
+          floorName={floor.name}
+          onClose={() => setPhotoOpen(false)}
+        />
+      )}
       <EditorStatus
         plan={plan}
         floorCount={project.floors.length}

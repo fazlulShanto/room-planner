@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Moon, Sun, X } from 'lucide-react'
 import type { LightingSettings } from './model'
 import { formatTime, lightingAt, parseTime } from './lighting'
+import { useDismissibleDetails } from './editor/useOutsideDismiss'
 
 type Props = {
   value: LightingSettings
@@ -60,7 +61,7 @@ function TimeField({ hour, onChange }: { hour: number; onChange: (hour: number) 
 }
 
 export default function LightingControls({ value, onPreview, onCommit }: Props) {
-  const details = useRef<HTMLDetailsElement>(null)
+  const details = useDismissibleDetails()
   const pending = useRef<LightingSettings | null>(null)
   const night = lightingAt(value).night
   const Icon = night ? Moon : Sun

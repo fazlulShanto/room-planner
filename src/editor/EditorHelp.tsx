@@ -1,5 +1,7 @@
 import { X } from 'lucide-react'
+import { useRef } from 'react'
 import type { WebMCPStatus } from '../webmcp/useWebMCP'
+import { useOutsideDismiss } from './useOutsideDismiss'
 
 export default function EditorHelp({
   onClose,
@@ -10,8 +12,10 @@ export default function EditorHelp({
   onUseExample: () => void
   webMCPStatus: WebMCPStatus
 }) {
+  const popover = useRef<HTMLDivElement>(null)
+  useOutsideDismiss(popover, onClose)
   return (
-    <div className="help-popover">
+    <div ref={popover} id="editor-help" className="help-popover">
       <div className="popover-title">
         <strong>Make room for your ideas.</strong>
         <button onClick={onClose} aria-label="Close help">

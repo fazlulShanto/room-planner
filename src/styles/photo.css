@@ -1,0 +1,228 @@
+.photo-dialog {
+  width: min(1440px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
+  height: calc(100dvh - 32px);
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 16px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: 0 20px 80px #0008;
+}
+.photo-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.photo-dialog::backdrop {
+  background: #101416b8;
+}
+.photo-heading,
+.photo-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.photo-heading {
+  justify-content: space-between;
+}
+.photo-heading > div {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.photo-heading h2 {
+  margin: 0;
+  font-size: 17px;
+}
+.photo-heading p,
+.photo-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.photo-settings {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(120px, 1fr) 104px;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  flex-shrink: 0;
+}
+.photo-settings label {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-content: start;
+  align-items: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  min-width: 0;
+}
+.photo-settings select {
+  width: 100%;
+  height: 32px;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+}
+.photo-settings input[type='range'] {
+  width: 100%;
+  height: 32px;
+  margin: 0;
+  accent-color: var(--green);
+}
+.photo-settings output {
+  margin-left: auto;
+  color: var(--green);
+  font-variant-numeric: tabular-nums;
+}
+.photo-door-control {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  height: 32px;
+  color: var(--text);
+  font-size: 12px;
+}
+.photo-door-control input {
+  appearance: none;
+  flex-shrink: 0;
+  position: relative;
+  width: 30px;
+  height: 18px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  margin: 0;
+  background: var(--surface);
+  cursor: pointer;
+}
+.photo-door-control input::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+.photo-door-control input:checked {
+  background: var(--green);
+}
+.photo-door-control input:checked::after {
+  transform: translateX(12px);
+  background: var(--panel);
+}
+.photo-stage {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  container-type: size;
+  border-radius: 8px;
+  background: #141719;
+  overflow: hidden;
+}
+.photo-preview {
+  position: relative;
+  width: min(100%, calc(100cqh * 16 / 9));
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #25292d;
+  touch-action: none;
+}
+.photo-preview > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.photo-preview-busy {
+  pointer-events: none;
+}
+.photo-unavailable {
+  display: grid;
+  place-content: center;
+  height: 100%;
+  padding: 24px;
+  margin: 0;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.photo-error {
+  color: var(--warning);
+  font-size: 12px;
+  margin: 4px 0 0;
+}
+.photo-actions {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.photo-caption {
+  margin-right: auto;
+}
+.photo-caption > span {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.photo-actions a {
+  text-decoration: none;
+}
+.photo-actions button,
+.photo-actions a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+@media (max-width: 640px) {
+  .photo-dialog {
+    padding: 12px;
+    width: calc(100vw - 16px);
+    max-width: calc(100vw - 16px);
+    max-height: calc(100dvh - 16px);
+  }
+  .photo-heading > div {
+    gap: 2px;
+    flex-direction: column;
+  }
+  .photo-settings {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px 12px;
+  }
+  .photo-caption {
+    flex-basis: 100%;
+  }
+  .photo-heading p {
+    font-size: 11px;
+  }
+}
+@media (max-width: 640px) and (min-height: 600px) {
+  .photo-dialog {
+    height: fit-content;
+  }
+  .photo-stage {
+    flex: none;
+    aspect-ratio: 16 / 9;
+  }
+}
+@media (max-height: 440px) and (min-width: 641px) {
+  .photo-dialog {
+    padding: 10px;
+    gap: 8px;
+  }
+  .photo-caption .photo-note {
+    display: none;
+  }
+}

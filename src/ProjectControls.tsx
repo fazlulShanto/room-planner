@@ -1,5 +1,6 @@
 import { Layers, Plus, Copy, FolderOpen, Trash2 } from 'lucide-react'
 import type { Floor, Project, Workspace } from './projects'
+import { useDismissibleDetails } from './editor/useOutsideDismiss'
 export function ProjectMenu({
   workspace,
   project,
@@ -13,8 +14,9 @@ export function ProjectMenu({
   onNew: (example: boolean) => void
   onRename: (name: string) => void
 }) {
+  const details = useDismissibleDetails()
   return (
-    <details className="project-menu">
+    <details ref={details} className="project-menu">
       <summary title="Projects">
         <FolderOpen size={15} />
         <span>{project.name}</span>
@@ -93,6 +95,7 @@ export function FloorControls({
   building: boolean
   onBuilding: () => void
 }) {
+  const details = useDismissibleDetails()
   return (
     <div className="floor-controls">
       <label>
@@ -109,7 +112,7 @@ export function FloorControls({
           ))}
         </select>
       </label>
-      <details className="floor-menu">
+      <details ref={details} className="floor-menu">
         <summary aria-label="Manage floors" title="Manage floors">
           <Plus size={15} />
         </summary>

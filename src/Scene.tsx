@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import WalkControls, { type WalkControlsProps } from './WalkControls'
 import SceneLighting from './SceneLighting'
+import PhotoCamera, { type PhotoSettings } from './PhotoCamera'
 import { createDollhouseCamera, fitDollhouseCamera } from './camera'
 import { canColorRoom, roomFinishes } from './finishes'
 import { RoomFloor, RoomCeiling, WallStructure, useWallHeights } from './Architecture'
@@ -34,6 +35,7 @@ import {
 } from './model'
 
 export type SceneProps = {
+  photo?: PhotoSettings
   plan: Plan
   stackedFloors?: { id: string; plan: Plan; elevation: number }[]
   lighting: LightingSettings
@@ -653,7 +655,9 @@ function World({ props }: { props: SceneProps }) {
   return (
     <>
       <color attach="background" args={['#25292d']} />
-      {props.walk ? (
+      {props.photo ? (
+        <PhotoCamera {...props.photo} />
+      ) : props.walk ? (
         <WalkControls
           {...props.walkControls}
           plan={props.plan}
@@ -706,7 +710,7 @@ export default function Scene(props: SceneProps) {
       shadows
       camera={viewCamera}
       dpr={[1, 2]}
-      frameloop={props.walk ? 'always' : 'demand'}
+      frameloop={props.walk && !props.photo ? 'always' : 'demand'}
       gl={{
         antialias: true,
         alpha: false,

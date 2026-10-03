@@ -14,6 +14,7 @@ import {
 import { formatDimension } from './model'
 import type { WalkLook } from './WalkControls'
 import { STILL, type WalkInput } from './walk'
+import { useDismissibleDetails } from './editor/useOutsideDismiss'
 
 type WalkPadProps = {
   onInput: (input: WalkInput) => void
@@ -37,6 +38,7 @@ export default function WalkPad({
   onMouseLook,
   onDragLook,
 }: WalkPadProps) {
+  const heightDetails = useDismissibleDetails()
   const pendingHeight = useRef<number | null>(null)
   const finishHeight = () => {
     if (pendingHeight.current !== null) {
@@ -121,6 +123,7 @@ export default function WalkPad({
       </div>
       <div className="walk-caption" role="group" aria-label="Walking camera controls">
         <details
+          ref={heightDetails}
           className="walk-height-control"
           onToggle={(e) => {
             if (!e.currentTarget.open) finishHeight()

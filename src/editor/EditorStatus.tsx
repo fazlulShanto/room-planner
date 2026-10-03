@@ -1,7 +1,9 @@
 import { AlertTriangle, CheckCircle2, ChevronRight, X } from 'lucide-react'
+import { useRef } from 'react'
 import type { Issue, Plan } from '../model'
 import type { SceneProps } from '../Scene'
 import type { EditorView } from './EditorViewport'
+import { useOutsideDismiss } from './useOutsideDismiss'
 
 type Props = {
   plan: Plan
@@ -30,6 +32,8 @@ export default function EditorStatus({
   notice,
   onDismissNotice,
 }: Props) {
+  const popover = useRef<HTMLDivElement>(null)
+  useOutsideDismiss(popover, onCloseIssues)
   return (
     <>
       <footer className="app-footer" aria-label="Planner status">
@@ -62,6 +66,7 @@ export default function EditorStatus({
       </footer>
       {showIssues && (
         <div
+          ref={popover}
           className="issues-popover"
           id="placement-notes"
           role="region"

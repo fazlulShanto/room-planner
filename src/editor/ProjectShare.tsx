@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { Check, Copy, X } from 'lucide-react'
 import type { Project } from '../projects'
 import { createShareUrl, LONG_SHARE_URL_LENGTH } from '../sharing'
+import { useOutsideDismiss } from './useOutsideDismiss'
 
 function ShareModal({
   title,
@@ -14,6 +15,7 @@ function ShareModal({
 }) {
   const dialog = useRef<HTMLDialogElement>(null)
   const titleId = useId()
+  useOutsideDismiss(dialog, () => onClose?.())
   useEffect(() => {
     const element = dialog.current!
     element.showModal()
